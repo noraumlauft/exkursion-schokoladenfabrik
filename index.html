@@ -1,0 +1,1095 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#e9e1d3">
+<title>Schokoladenfabrik</title>
+<style>
+:root{color-scheme:light;--wall1:#efe8dc;--wall2:#dcd2c2;--ui:#fffaf0;--ink:#3a2414;--accent:#e8892b;--accentDark:#b0631a;--ok:#4a9a3c;--choco:#5a2e14}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;height:100dvh;overscroll-behavior:none;overflow:hidden;font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;color:var(--ink);background:linear-gradient(var(--wall1),var(--wall2));user-select:none;-webkit-user-select:none}
+button{font-family:inherit;cursor:pointer}
+*,*::before,*::after{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+[hidden]{display:none!important}
+#game{position:fixed;inset:0;overflow:hidden;touch-action:none}
+#far,#world{position:absolute;left:0;top:0;height:500px;transform-origin:0 0}
+#far{width:4000px}
+#world{width:3400px}
+#soil{position:absolute;left:0;right:0;bottom:0;display:none;background:repeating-linear-gradient(90deg,transparent 0 79px,rgba(0,0,0,.08) 79px 80px),linear-gradient(#8e959a,#71787d 40%,#5c6267)}
+.ground{position:absolute;left:0;top:400px;width:3400px;height:100px;background:repeating-linear-gradient(90deg,transparent 0 59px,rgba(0,0,0,.12) 59px 61px),linear-gradient(#b9bec2 0 8px,#a3a9ad 8px,#8e959a)}
+.path{position:absolute;left:0;top:414px;width:3400px;height:6px;background:repeating-linear-gradient(90deg,#f2c230 0 30px,#3a3a3a 30px 40px);opacity:.85}
+.deco,.station,#player,.dock{position:absolute;bottom:96px}
+.deco{transform-origin:bottom center;z-index:1}
+.station{display:flex;align-items:flex-end;gap:10px;transform:translateX(-50%);z-index:2}
+.sign{display:flex;flex-direction:column;align-items:center}
+.board{background:#f3dfb4;border:4px solid #8a5a2b;border-radius:10px;padding:4px 10px;text-align:center;font-weight:bold;font-size:15px;white-space:nowrap;box-shadow:0 3px 0 rgba(0,0,0,.2)}
+.board b{display:block;font-size:22px;color:var(--accentDark)}
+.post{width:10px;height:50px;background:#7d868c}
+.station.done .board{background:#d9eecb;border-color:var(--ok)}
+.station.done .board b::after{content:" ✓";color:var(--ok)}
+.station.next .sign::before{content:"▼";font-size:30px;color:var(--accent);animation:bounce .7s infinite alternate;text-shadow:0 2px 0 #fff}
+@keyframes bounce{to{transform:translateY(-10px)}}
+#player{z-index:3;transform:translateX(-50%);bottom:87px!important}
+#player::after{content:'';position:absolute;left:14px;right:14px;bottom:1px;height:7px;border-radius:50%;background:rgba(0,0,0,.22);z-index:0}
+#player.climb::after{display:none}
+#pflip{transition:transform .1s;position:relative}
+#pflip>svg{position:relative;z-index:1}
+#carry{position:absolute;left:-23px;top:6px;width:50px;height:60px;z-index:2;filter:drop-shadow(1px 1px 0 rgba(0,0,0,.18));transform-origin:50% 100%;transform:rotate(-8deg)}
+#carry.pop{animation:carrypop .7s}
+@keyframes carrypop{0%{transform:rotate(-8deg) scale(0)}60%{transform:rotate(-8deg) scale(1.35)}100%{transform:rotate(-8deg) scale(1)}}
+#player.walk #carry{animation:carrybob .32s infinite alternate}
+@keyframes carrybob{to{transform:rotate(-4deg) translateY(-2px)}}
+#player #carry.pop{animation:carrypop .55s}
+.legL,.legR,.armL,.armR{transform-box:fill-box;transform-origin:50% 0}
+g.armR{transform-box:view-box;transform-origin:43.5px 43px}
+/* Kittel und Haube */
+.coat,.cap{display:none}
+#player.dressed .coat,#player.dressed .cap{display:inline}
+#player.dressed .shirt{fill:#f4f6f8}
+#player.dressed .hat{display:none}
+/* Behälter vorne mit beiden Armen halten */
+#player.front .armR,#player.front.walk .armR{animation:none;transform:rotate(-30deg)}
+#player.front .armL,#player.front.walk .armL{display:none}
+#player.front.walk .frontload{animation:bob .16s infinite alternate}
+/* Szenen-Posen */
+#player.act-point g.armR{animation:none;transform:rotate(-115deg)}
+#player.act-scoop g.armR{animation:actScoop .8s ease-in-out infinite}
+#player.act-reach g.armR{animation:none;transform:rotate(-70deg)}
+#player.act-lift g.armR{animation:none;transform:rotate(-150deg)}
+#player.act-crank g.armR{animation:actCrank .7s linear infinite}
+#player.climb .legL,#player.climb .armL,#player.climb g.armR{animation:swA .28s infinite alternate}
+#player.climb .legR{animation:swB .28s infinite alternate}
+@keyframes actScoop{0%,100%{transform:rotate(-25deg)}50%{transform:rotate(-80deg)}}
+@keyframes actCrank{0%{transform:rotate(-40deg)}50%{transform:rotate(-100deg)}100%{transform:rotate(-40deg)}}
+/* Schüler-/Lehrermodus */
+#tbadge{position:fixed;left:50%;bottom:calc(2px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:30;background:#2f4a7a;color:#fff;font-weight:bold;font-size:13px;padding:3px 12px;border-radius:12px;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.skipbtn{border:none;background:var(--ui);color:var(--ink);font-weight:bold;font-size:14px;padding:6px 12px;border-radius:16px;box-shadow:0 2px 0 #c9b28f;cursor:pointer;pointer-events:auto;white-space:nowrap}
+.skiprow{display:flex;justify-content:flex-end;margin:8px 0 2px}
+.waitnote{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+#bubble .skipbtn{margin-top:6px;font-size:13px;padding:4px 10px}
+#tstation{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:calc(112px + env(safe-area-inset-bottom,0px));z-index:10;font-size:15px;padding:9px 14px}
+body.scene-on #tstation{display:none}
+/* Meister Lenz */
+#guide{position:fixed;left:max(10px,env(safe-area-inset-left));top:120px;display:flex;align-items:flex-start;gap:6px;z-index:9;max-width:min(560px,calc(100vw - 20px));pointer-events:none}
+#guide .meister{width:68px;height:86px;flex:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.3))}
+#bubble{position:relative;background:var(--ui);border-radius:16px;padding:8px 13px 9px;box-shadow:0 4px 14px rgba(0,0,0,.22);margin-top:6px}
+#bubble::before{content:"";position:absolute;left:-10px;top:24px;border:10px solid transparent;border-right-color:var(--ui);border-left:0}
+#bubble .who{font-weight:bold;font-size:13px;color:var(--accentDark)}
+#bubble .say{font-size:16px;line-height:1.32}
+.meister .mouth{transform-box:fill-box;transform-origin:50% 50%}
+.meister.talk .mouth{animation:talk .2s ease-in-out infinite alternate}
+@keyframes talk{from{transform:scaleY(.3)}to{transform:scaleY(1.3)}}
+.mintro{display:flex;align-items:flex-start;gap:10px}
+.mintro .meister{width:64px;height:80px;flex:none;margin-top:4px}
+.mintro .intro{flex:1;min-width:0}
+.waitnote{background:#eef3fb;color:#2f4a7a;border-radius:12px;padding:7px 12px;margin-bottom:10px;font-weight:bold;font-size:15px;text-align:center}
+#area.wait{pointer-events:none;opacity:.5;filter:saturate(.55)}
+.sv{position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);height:100%;aspect-ratio:400/250;max-width:100%}
+.sv .tapit svg{display:block;width:100%;height:auto}
+.scene{position:absolute;bottom:96px;z-index:2;pointer-events:none}
+.scene .sp{position:absolute;line-height:0}
+.scene .sclabel{background:var(--ui);border-radius:10px;padding:5px 9px;font-weight:bold;font-size:13px;line-height:1.2;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.2);color:var(--ink)}
+.p-flame,.p-crusher,.p-paddle,.p-fan,.p-wheel,.p-hand,.p-molds,.p-roller{transform-box:fill-box}
+.p-flame{transform-origin:50% 100%}
+.p-roll{transform-box:fill-box;transform-origin:50% 50%}
+.p-fan,.p-wheel,.p-paddle,.p-rstone,.p-fly{transform-box:fill-box;transform-origin:50% 50%}
+.p-hand{transform-origin:50% 100%}
+#skip{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:12;border:none;background:var(--ui);color:var(--ink);font-weight:bold;font-size:16px;padding:12px 20px;border-radius:30px;box-shadow:0 4px 0 #c9b28f}
+body.scene-on .ctl{opacity:.35;pointer-events:none}
+.deco{transition:opacity .4s}.deco.away{opacity:0}
+.dock .whl{transform-box:fill-box;transform-origin:50% 50%}
+.gbowl{position:absolute;bottom:96px;z-index:2;line-height:0;transform:translateX(-50%)}
+.gbowl.want::before,#stand.want::before{content:'▼';position:absolute;left:-20px;right:-20px;text-align:center;top:-36px;font-size:26px;color:var(--accent);text-shadow:0 2px 0 #fff;line-height:1;animation:bounce .7s infinite alternate;z-index:3}
+#stand{position:absolute;bottom:96px;width:60px;height:150px;margin-left:-30px;z-index:2;line-height:0}
+#stand .gear{transition:opacity .2s}
+#player.walk .legL,#player.walk .armR{animation:swA .32s infinite alternate}
+#player.walk .legR,#player.walk .armL{animation:swB .32s infinite alternate}
+#player.walk svg{animation:bob .16s infinite alternate}
+@keyframes swA{from{transform:rotate(22deg)}to{transform:rotate(-22deg)}}
+@keyframes swB{from{transform:rotate(-22deg)}to{transform:rotate(22deg)}}
+@keyframes bob{to{transform:translateY(-3px)}}
+
+/* HUD */
+#hud{position:fixed;top:env(safe-area-inset-top,0px);left:env(safe-area-inset-left,0px);right:env(safe-area-inset-right,0px);display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:10px 12px;z-index:10;pointer-events:none}
+#hud>*{pointer-events:auto}
+.pill{background:var(--ui);border-radius:16px;padding:7px 12px;box-shadow:0 3px 10px rgba(0,0,0,.15);font-weight:bold}
+#progress{display:flex;gap:5px;align-items:center}
+.slot{width:28px;height:28px;border-radius:50%;background:#eadcc4;display:grid;place-items:center;font-size:14px;color:#a08a6a;transition:.3s}
+.slot.done{background:var(--accent);color:#fff;transform:scale(1.1)}
+#tip{position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:9;font-size:15px;width:max-content;max-width:calc(100vw - 24px);text-align:center;line-height:1.35}
+#tip .go{display:block;font-size:16px}
+#tip .have{display:block;font-weight:normal;font-size:14px;opacity:.85}
+@media (max-width:440px){.mbt{display:none}#hud{padding:8px}#hud .pill{padding:6px 9px;font-size:14px}#progress{gap:3px}.slot{width:22px;height:22px;font-size:11px}#fsbtn,#sndbtn{font-size:15px!important;padding:6px 8px!important}}
+.ctl{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:74px;height:74px;border-radius:50%;font-size:32px;border:none;background:rgba(255,250,240,.95);box-shadow:0 5px 0 #c9b28f;z-index:10;color:var(--ink);touch-action:none}
+.ctl:active,.ctl.on{transform:translateY(3px);box-shadow:0 2px 0 #c9b28f}
+#left{left:calc(16px + env(safe-area-inset-left,0px))}#right{right:calc(16px + env(safe-area-inset-right,0px))}
+#action{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:10;font-size:18px;padding:14px 22px;border-radius:40px;border:none;background:var(--accent);color:#fff;font-weight:bold;box-shadow:0 5px 0 var(--accentDark);display:none;max-width:calc(100vw - 196px);animation:pulse 1.2s infinite}
+#action.locked{background:#9c8b78;box-shadow:0 5px 0 #6f6152;animation:none}
+@keyframes pulse{50%{transform:translateX(-50%) scale(1.05)}}
+
+/* Modal */
+#modal{position:fixed;inset:0;background:rgba(40,25,10,.55);display:none;align-items:center;justify-content:center;z-index:20;padding:10px}
+#modal.open{display:flex}
+.card{background:var(--ui);border-radius:22px;width:min(720px,100%);max-height:100%;overflow:auto;padding:16px 18px 18px;box-shadow:0 10px 40px rgba(0,0,0,.3);animation:pop .3s}
+@keyframes pop{from{transform:scale(.9);opacity:0}}
+.head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.head h2{margin:0;font-size:22px}
+.num{width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:bold;font-size:19px;flex:none}
+.iconbtn{border:none;background:#f1e3c8;border-radius:12px;width:42px;height:42px;font-size:19px;flex:none}
+.head .iconbtn:first-of-type{margin-left:auto}
+.intro{font-size:17px;line-height:1.45;margin:6px 0 10px}
+#cnt{white-space:nowrap}
+.taskline{font-weight:bold;font-size:16px;display:flex;justify-content:space-between;gap:10px;background:#fdecc8;padding:8px 12px;border-radius:12px;margin-bottom:10px}
+.hint{min-height:22px;color:#b0451a;font-weight:bold;margin:8px 0 0;text-align:center;font-size:16px}
+.hint.good{color:var(--ok)}
+.fact{background:#e3f2d9;border-left:6px solid var(--ok);padding:10px 14px;border-radius:10px;margin-top:10px;font-size:16px;line-height:1.4;animation:pop .4s}
+.btn{border:none;background:var(--accent);color:#fff;font-weight:bold;font-size:17px;padding:12px 20px;border-radius:30px;box-shadow:0 4px 0 var(--accentDark)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--accentDark)}
+.btn:disabled{opacity:.45}
+.btn.green{background:var(--ok);box-shadow:0 4px 0 #2e6b24}
+.btn.big{display:block;margin:14px auto 0;font-size:19px;padding:14px 26px}
+.row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+/* Aufgaben-Bühnen */
+.stage{position:relative;height:250px;border-radius:16px;background:linear-gradient(#eef1f3,#d5dbdf);overflow:hidden;touch-action:manipulation}
+.tapit{position:absolute;transform:translate(-50%,-50%);background:none;border:none;padding:0;line-height:0;cursor:pointer}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translate(-58%,-50%)}75%{transform:translate(-42%,-50%)}}
+.bin{position:absolute;right:14px;bottom:14px;width:74px;height:70px;background:#7d868c;border-radius:6px 6px 12px 12px;border-top:6px solid #5f676c;color:#fff;font-weight:bold;font-size:12px;display:grid;place-items:center;text-align:center}
+.bar{height:26px;background:#eadcc4;border-radius:13px;overflow:hidden;margin-top:10px;position:relative}
+.bar .bf{height:100%;width:0;background:linear-gradient(90deg,#c48a4a,#7a4a24);transition:width .3s}
+.bar span{position:absolute;inset:0;display:grid;place-items:center;font-weight:bold;font-size:14px}
+.roastbar{position:relative;height:30px;border-radius:15px;margin-top:10px;background:linear-gradient(90deg,#d9b68a 0 55%,#8fcf7a 55% 80%,#d9542b 80%);overflow:visible}
+.roastbar .zl{position:absolute;top:0;bottom:0;display:grid;place-items:center;font-size:12px;font-weight:bold;color:#3a2414}
+.roastbar .mk{position:absolute;top:-6px;bottom:-6px;width:6px;margin-left:-3px;background:#3a2414;border-radius:3px;box-shadow:0 0 0 2px #fff}
+.ingr{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px}
+.ing{border:3px solid #eadcc4;background:#fff;border-radius:14px;padding:6px 10px;font-size:15px;font-weight:bold;color:var(--ink);display:flex;align-items:center;gap:6px}
+.ing.used{opacity:.35;pointer-events:none}
+.ing.no{animation:nope .4s}
+@keyframes nope{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.snow{position:absolute;inset:0;z-index:2;overflow:hidden;background:rgba(150,200,240,.0);transition:background .4s,box-shadow .5s;pointer-events:none}
+.snow.on{background:rgba(120,185,240,.5);box-shadow:inset 0 0 46px 20px rgba(255,255,255,.85)}
+.crystal{position:absolute;line-height:0;opacity:0;animation:crystal 2s ease-out forwards}
+@keyframes crystal{0%{opacity:0;transform:scale(.15) rotate(0deg)}35%{opacity:1}75%{opacity:1;transform:scale(1) rotate(70deg)}100%{opacity:0;transform:scale(1.08) translateY(12px) rotate(95deg)}}
+
+/* Ende / Start */
+.steps{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0}
+.step{background:#fdecc8;border-radius:14px;padding:8px 10px;text-align:center;width:110px;font-size:14px}
+.step big{display:block;font-size:28px}
+.opt{display:block;width:100%;text-align:left;border:3px solid #eadcc4;background:#fff;border-radius:14px;padding:12px 14px;font-size:17px;margin:8px 0;color:var(--ink)}
+.opt.right{border-color:var(--ok);background:#e3f2d9}
+.opt.wrong{border-color:#d9542b;background:#fbe1d6}
+.cert{border:6px double var(--accent);border-radius:18px;padding:20px;text-align:center;background:#fffdf6}
+.cert h1{margin:6px 0;font-size:28px;color:var(--accentDark)}
+.cert .nm{font-size:26px;font-weight:bold;border-bottom:2px solid var(--ink);display:inline-block;padding:0 20px 2px;margin:8px 0}
+.think{background:#eef3fb;border-left:6px solid #5a83c4;padding:10px 14px;border-radius:10px;margin-top:12px;font-size:15px;line-height:1.4}
+input.name{font-size:19px;padding:10px 14px;border-radius:12px;border:3px solid #eadcc4;width:min(280px,100%);text-align:center;font-family:inherit}
+.confetti{position:fixed;top:-20px;width:10px;height:14px;z-index:30;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+@media (max-height:520px){.mintro .meister{width:46px;height:58px}#guide .meister{width:52px;height:66px}#bubble .say{font-size:14px}.stage{height:200px}.intro{font-size:15px;margin:2px 0 6px}.card{padding:12px 14px}}
+@media (prefers-reduced-motion:reduce){.station.next .sign::before,.gbowl.want::before,#stand.want::before,#action{animation:none}}
+</style>
+<div id="game">
+  <div id="far"></div>
+  <div id="world"></div>
+  <div id="soil"></div>
+</div>
+<div id="hud">
+  <div style="display:flex;gap:6px;align-items:flex-start"><button class="pill" id="menubtn" aria-label="Spielmenü öffnen" title="Spielmenü" style="border:none;font-size:inherit;font-family:inherit;color:inherit;cursor:pointer">☰<span class="mbt"> Schokoladenfabrik</span></button><button class="pill" id="fsbtn" aria-label="Vollbild" title="Vollbild" style="border:none;font-size:17px;padding:7px 11px">⛶</button><button class="pill" id="sndbtn" style="border:none;font-size:17px;padding:7px 11px"></button></div>
+  <div class="pill" id="progress"></div>
+</div>
+<div class="pill" id="tip"></div>
+<button class="ctl" id="left" aria-label="Nach links">◀</button>
+<button class="ctl" id="right" aria-label="Nach rechts">▶</button>
+<button id="action"></button>
+<div id="guide" hidden><span id="gfig"></span><div id="bubble" role="status" aria-live="polite"><div class="who">Meister Lenz</div><div class="say" id="say"></div><button class="skipbtn" id="gskip" hidden>Überspringen ⏭</button></div></div>
+<div id="tbadge" hidden>🎓 Lehrermodus</div>
+<button class="skipbtn" id="tstation" hidden></button>
+<div id="modal"></div>
+
+<script>
+const $=q=>document.querySelector(q);
+const W=3400,H=500,END_X=3175,HX=330; // HX: Hygieneschleuse (Kittel und Haube)
+let s=1,offY=0,cam=0,px=140,dir=1,target=null,modalOpen=true,done=0,playerName='';
+const keys={left:false,right:false};
+function rng(seed){return()=>(seed=(seed*16807)%2147483647)/2147483647}
+/* ---------- Ton: Fabrikhalle und Maschinen (alles live im Browser erzeugt, keine Audiodateien) ---------- */
+const Sfx=(()=>{
+ const AC=window.AudioContext||window.webkitAudioContext;
+ const NOOP={stop(){},move(){}};
+ const loops=new Set();
+ let ctx=null,master,amb,mach,rev,white,brown,started=false,muted=false,ducked=0;
+ try{muted=localStorage.getItem('fabrikTon')==='aus'}catch(e){}
+ const rnd=(a,b)=>a+Math.random()*(b-a);
+ const running=()=>!!ctx&&ctx.state==='running';
+ function noiseBuffer(isBrown){const sr=ctx.sampleRate,n=sr*3|0,x=sr*.1|0,raw=new Float32Array(n+x);let l=0;
+  for(let i=0;i<n+x;i++){const w=Math.random()*2-1;if(isBrown){l=(l+.02*w)/1.02;raw[i]=l*3.5}else raw[i]=w}
+  const b=ctx.createBuffer(1,n,sr),d=b.getChannelData(0);d.set(raw.subarray(0,n));
+  for(let i=0;i<x;i++)d[i]=raw[i]*(i/x)+raw[n+i]*(1-i/x); // nahtlos schleifen
+  return b}
+ function hallImpulse(){const sr=ctx.sampleRate,n=sr*2|0,b=ctx.createBuffer(2,n,sr);
+  for(let c=0;c<2;c++){const d=b.getChannelData(c);let lp=0;for(let i=0;i<n;i++){const k=i/n;lp+=(Math.random()*2-1-lp)*(.5-.42*k);d[i]=lp*Math.pow(1-k,3)}}
+  return b}
+ function init(){
+  if(ctx||!AC)return;
+  try{ctx=new AC()}catch(e){ctx=null;return}
+  master=ctx.createGain();master.gain.value=muted?0:1;
+  const comp=ctx.createDynamicsCompressor();comp.threshold.value=-12;comp.ratio.value=6;comp.attack.value=.004;comp.release.value=.18;
+  master.connect(comp);comp.connect(ctx.destination);
+  amb=ctx.createGain();amb.gain.value=0;amb.connect(master);
+  mach=ctx.createGain();mach.gain.value=.85;mach.connect(master);
+  white=noiseBuffer(false);brown=noiseBuffer(true);
+  rev=ctx.createGain();rev.gain.value=1;const con=ctx.createConvolver();con.buffer=hallImpulse();const wet=ctx.createGain();wet.gain.value=.55;rev.connect(con);con.connect(wet);wet.connect(master);
+ }
+ // Beim ersten Tippen/Klicken starten; danach holt jede Geste einen unterbrochenen Ton zurück
+ function unlock(){init();if(!ctx)return;
+  const go=()=>{if(!started&&ctx.state==='running'){started=true;startAmbient()}};
+  if(ctx.state!=='running'){const r=ctx.resume();if(r&&r.then)r.then(go).catch(()=>{})}else go()}
+ ['pointerdown','touchend','click','keydown'].forEach(ev=>addEventListener(ev,unlock,{capture:true,passive:true}));
+ document.addEventListener('visibilitychange',()=>{if(!ctx)return;if(document.hidden){if(ctx.suspend)ctx.suspend().catch(()=>{})}else ctx.resume().catch(()=>{})});
+ function applyLevel(){if(ctx)master.gain.setTargetAtTime(muted?0:ducked||1,ctx.currentTime,.08)}
+
+ /* Bausteine für Einzelgeräusche */
+ function route(node,to,send){node.connect(to||mach);if(send){const s=ctx.createGain();s.gain.value=send;node.connect(s);s.connect(rev)}}
+ function env(g,t,peak,a,d){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.0002,peak),t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+d)}
+ function nz({buf,type='bandpass',f=1000,f2,q=1,t=0,a=.002,d=.08,g=.3,to,send=.15}){const t0=ctx.currentTime+.005+t;
+  const s=ctx.createBufferSource();s.buffer=buf||white;const fl=ctx.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t0);fl.Q.value=q;if(f2)fl.frequency.exponentialRampToValueAtTime(f2,t0+a+d);
+  const v=ctx.createGain();env(v,t0,g,a,d);s.connect(fl);fl.connect(v);route(v,to,send);s.start(t0,rnd(0,2.4));s.stop(t0+a+d+.03)}
+ function tn({w='sine',f=200,f2,t=0,a=.002,d=.1,g=.3,to,send=.1}){const t0=ctx.currentTime+.005+t;
+  const o=ctx.createOscillator();o.type=w;o.frequency.setValueAtTime(f,t0);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t0+a+d);
+  const v=ctx.createGain();env(v,t0,g,a,d);o.connect(v);route(v,to,send);o.start(t0);o.stop(t0+a+d+.03)}
+ const metal=(f,g,d,t=0,to,send=.5)=>[1,2.76,5.4,8.9].forEach((m,i)=>tn({w:'sine',f:f*m*rnd(.99,1.01),d:d/(1+i*.7),g:g/(1+i),t,to,send}));
+
+ /* Einzelgeräusche */
+ const ONE={
+  bean:v=>nz({f:rnd(1900,3800),q:5,d:rnd(.012,.03),g:.9*v,send:.05}),                 // einzelne Bohne
+  beans:v=>{for(let i=0;i<7;i++)nz({f:rnd(1500,3400),q:4,d:rnd(.015,.04),g:rnd(.4,.9)*v,t:i*rnd(.018,.04),send:.1})}, // Hand voll Bohnen
+  beanMetal:v=>{for(let i=0;i<4;i++){nz({f:rnd(2600,4600),q:7,d:.03,g:.7*v,t:i*.028,send:.12});tn({f:rnd(1500,2300),d:.03,g:.1*v,t:i*.028})}}, // Bohnen auf Blech
+  stone:v=>{tn({w:'square',f:190,f2:85,d:.07,g:.2*v,send:.25});nz({f:800,q:1.2,d:.06,g:.7*v,send:.3});metal(310,.09*v,.22,.005)}, // Stein in Metallbehälter
+  clack:v=>{nz({f:1500,q:1,d:.04,g:.8*v,send:.4});metal(420,.13*v,.26);tn({w:'square',f:120,f2:60,d:.08,g:.14*v})},
+  crack:v=>{nz({type:'highpass',f:1800,q:.7,d:.028,g:.8*v,send:.1});tn({w:'triangle',f:320,f2:110,d:.05,g:.32*v,send:.05})}, // Knack!
+  crunch:v=>{nz({f:rnd(1600,2800),q:1.5,d:.04,g:.75*v,send:.1});nz({f:rnd(500,900),q:1.5,d:.06,g:.55*v,t:.02,send:.1});tn({w:'triangle',f:rnd(120,150),f2:60,d:.08,g:.32*v})}, // Brecher
+  whoosh:v=>{nz({f:380,f2:2600,q:1.1,a:.32,d:.1,g:.8*v,send:.3});nz({f:2600,f2:500,q:1.1,a:.05,d:.55,g:.55*v,t:.38,send:.35})},
+  plop:v=>{nz({type:'lowpass',f:800,f2:220,q:.7,d:.14,g:.75*v,send:.15});tn({f:210,f2:95,d:.1,g:.36*v})},       // Pulver/Zutat fällt hinein
+  glug:v=>{const f=rnd(170,250);tn({f,f2:f*rnd(1.9,2.5),a:.006,d:rnd(.06,.11),g:.42*v,send:.08})},                // Blubbern
+  fill:v=>{for(let i=0;i<6;i++){const f=rnd(180,240)+i*22;tn({f,f2:f*2.1,a:.006,d:.08,g:.42*v,t:i*.08,send:.08})}}, // Form läuft voll
+  knock:v=>[0,.12].forEach((t,i)=>{tn({w:'triangle',f:i?300:430,f2:i?190:260,d:.07,g:.5*v,t,send:.2});nz({f:1200,q:1,d:.02,g:.4*v,t,send:.1})}),
+  foil:v=>{for(let i=0;i<14;i++)nz({type:'highpass',f:rnd(3500,7000),q:1,d:rnd(.008,.022),g:rnd(.15,.5)*v,t:i*rnd(.012,.02),send:.05})}, // Folie knistert
+  stamp:v=>{tn({w:'triangle',f:150,f2:60,d:.1,g:.42*v,send:.2});nz({f:700,q:1,d:.05,g:.5*v,send:.2});nz({type:'highpass',f:3200,q:.7,d:.09,g:.22*v,t:.07,send:.1})}, // Verpackungsmaschine
+  thud:v=>{tn({w:'triangle',f:125,f2:70,d:.12,g:.5*v,send:.15});nz({type:'lowpass',f:650,q:.7,d:.07,g:.5*v,send:.15})}, // Karton
+  slide:v=>{nz({f:1100,f2:1900,q:2,a:.15,d:.85,g:.28*v,send:.25});for(let i=0;i<4;i++)metal(560,.05*v,.1,i*.26)},  // Formen gleiten auf Metall
+  tick:v=>{nz({f:3400,q:9,d:.012,g:.55*v,send:.05});tn({f:1250,d:.012,g:.1*v})},
+  chain:v=>{nz({f:rnd(1000,1500),q:3,d:.03,g:.42*v,send:.15});tn({f:210,f2:140,d:.03,g:.1*v})}
+ };
+ function play(name,v=1,delay=0){if(!running()||!ONE[name])return;if(delay){setTimeout(()=>{if(running())ONE[name](v)},delay);return}ONE[name](v)}
+
+ /* Bausteine für Dauergeräusche */
+ function band(l,buf,type,f,q,g){const s=ctx.createBufferSource();s.buffer=buf;s.loop=true;s.loopEnd=3;const fl=ctx.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q;const v=ctx.createGain();v.gain.value=g;s.connect(fl);fl.connect(v);v.connect(l.g);s.start(0,rnd(0,2.5));l.srcs.push(s);return {s,fl,v}}
+ function tone(l,w,f,g){const o=ctx.createOscillator();o.type=w;o.frequency.value=f;const v=ctx.createGain();v.gain.value=g;o.connect(v);v.connect(l.g);o.start();l.srcs.push(o);return {o,v}}
+ function lfo(l,rate,depth,param,w='sine'){const o=ctx.createOscillator();o.type=w;o.frequency.value=rate;const v=ctx.createGain();v.gain.value=depth;o.connect(v);v.connect(param);o.start();l.srcs.push(o);return o}
+ function motor(l,f,g,cut){const fl=ctx.createBiquadFilter();fl.type='lowpass';fl.frequency.value=cut||900;fl.Q.value=.8;fl.connect(l.g);const v=ctx.createGain();v.gain.value=g;v.connect(fl);
+  const os=[1,1.008,2.01].map((m,i)=>{const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=f*m;if(i===2){const h=ctx.createGain();h.gain.value=.35;o.connect(h);h.connect(v)}else o.connect(v);o.start();l.srcs.push(o);return o});
+  return {os,fl,v}}
+ /* Die Maschinen */
+ const LOOP={
+  belt:l=>{motor(l,62,.13,950);const b=band(l,white,'bandpass',2300,2.2,.6);lfo(l,14,.55,b.v.gain,'square');l.every(85,()=>{if(Math.random()>.4)ONE.bean(.6)})},          // Rüttelband
+  conveyor:l=>{motor(l,74,.2,1500);l.every(200,()=>ONE.chain(1.4))},                                                                                                          // Förderband
+  roast:l=>{const b=band(l,brown,'lowpass',620,.6,.7);lfo(l,8.5,.2,b.v.gain);band(l,white,'bandpass',1500,.7,.14);tone(l,'sine',58,.3);motor(l,46,.1,700);const t0=performance.now();l.every(72,()=>ONE.bean(.42+.38*Math.sin((performance.now()-t0)/170)))}, // Brenner und Trommel
+  crush:l=>{motor(l,86,.13,1100);l.every(160,()=>ONE.crunch(rnd(.7,1)))},                                                                                                    // Brecher
+  fan:l=>{const b=band(l,white,'bandpass',950,.8,.42);lfo(l,13.3,.16,b.v.gain);tone(l,'triangle',266,.03)},                                                                  // Gebläse
+  grind:l=>{const m=motor(l,72,.3,800);const b=band(l,white,'bandpass',360,1,.75);lfo(l,1.55,.3,b.v.gain);band(l,white,'highpass',3000,.7,.05);lfo(l,6,4,m.os[0].frequency)}, // Mühle
+  stream:l=>{band(l,white,'lowpass',720,.7,.1);l.every(95,()=>ONE.glug(rnd(.5,1)))},                                                                                         // Masse läuft aus
+  mix:l=>{motor(l,55,.15,800);const b=band(l,white,'bandpass',540,.9,.65);lfo(l,2,.45,b.v.gain);l.every(250,()=>ONE.glug(.55))},                                             // Rührarm
+  conche:l=>{const b=band(l,brown,'lowpass',340,.7,.7);lfo(l,1.82,.28,b.v.gain);motor(l,66,.13,700);const c=band(l,white,'bandpass',780,1.2,.45);lfo(l,1.82,.3,c.v.gain);l.every(275,()=>ONE.tick(.7));l.every(340,()=>ONE.glug(.4))}, // Walze und schnelle Uhr
+  cool:l=>{const b=band(l,white,'highpass',3200,.7,.13);lfo(l,.9,.03,b.v.gain);band(l,white,'bandpass',700,.7,.1);tone(l,'sine',120,.13);tone(l,'sine',240,.06)},             // Kühltunnel
+  wrap:l=>{motor(l,142,.08,1500);l.every(48,()=>{if(Math.random()>.45)nz({type:'highpass',f:rnd(3500,7000),q:1,d:.014,g:rnd(.12,.34),send:.04})})},                           // Verpackung
+  truck:l=>{const m=motor(l,40,.34,500);const t=ctx.currentTime,sec=(l.dur||2300)/1000;m.os.forEach(o=>o.frequency.exponentialRampToValueAtTime(o.frequency.value*2.6,t+sec));m.fl.frequency.exponentialRampToValueAtTime(1300,t+sec);band(l,brown,'lowpass',260,.7,.8)}
+ };
+ function makeLoop(name,dur,level,fade=.1){
+  const g=ctx.createGain(),t=ctx.currentTime;g.gain.setValueAtTime(0,t);if(level)g.gain.linearRampToValueAtTime(level,t+fade);g.connect(mach);
+  const s=ctx.createGain();s.gain.value=.12;g.connect(s);s.connect(rev);
+  const l={g,srcs:[],ivs:[],dur,every(ms,fn){l.ivs.push(setInterval(()=>{if(running())fn()},ms))},
+   stop(f=.16){if(l.off)return;l.off=true;loops.delete(l);l.ivs.forEach(clearInterval);clearTimeout(l.tm);if(!ctx)return;const n=ctx.currentTime;g.gain.cancelScheduledValues(n);g.gain.setValueAtTime(g.gain.value,n);g.gain.setTargetAtTime(0,n,f/3);l.srcs.forEach(x=>{try{x.stop(n+f*1.6)}catch(e){}});setTimeout(()=>{try{g.disconnect();s.disconnect()}catch(e){}},f*1600+200)}};
+  LOOP[name](l);loops.add(l);if(dur)l.tm=setTimeout(()=>l.stop(),dur);return l}
+ function loop(name,dur){if(!running()||!LOOP[name])return NOOP;try{return makeLoop(name,dur,.8)}catch(e){console.warn(e);return NOOP}}
+ // Maschine, die direkt am Finger hängt: je schneller gedreht/gewischt wird, desto lauter
+ function drag(name,ref){if(!LOOP[name])return NOOP;let l=null,last=0,idle=null;
+  return {move(d){if(!running()||d<=0)return;if(!l||l.off)l=makeLoop(name,0,0);const t=performance.now(),dt=Math.max(8,t-last);last=t;
+    l.g.gain.setTargetAtTime(.25+.6*Math.min(1,d/(dt/1000)/ref),ctx.currentTime,.03);clearTimeout(idle);idle=setTimeout(()=>{if(l&&!l.off)l.g.gain.setTargetAtTime(0,ctx.currentTime,.05)},110)},
+   stop(){clearTimeout(idle);if(l)l.stop()}}}
+
+ /* Grundgeräusch der Halle */
+ function startAmbient(){const l={g:amb,srcs:[]};
+  band(l,brown,'lowpass',180,.6,.6);                                   // tiefes Grollen
+  const air=band(l,white,'bandpass',620,.6,.15);lfo(l,.13,.05,air.v.gain); // Lüftung, langsam atmend
+  band(l,brown,'bandpass',420,.8,.6);                                   // entfernte Maschinen
+  tone(l,'sine',100,.03);tone(l,'sine',150,.018);tone(l,'triangle',300,.006); // Netzbrummen, auch auf Tablet-Lautsprechern hörbar
+  amb.gain.setValueAtTime(0,ctx.currentTime);amb.gain.linearRampToValueAtTime(.36,ctx.currentTime+2.5);
+  // eine entfernte Stanze arbeitet gleichmäßig vor sich hin
+  setInterval(()=>{if(!running())return;[0,.42,.84,1.26].forEach((t,i)=>{nz({f:i%2?950:540,q:1.2,d:.09,g:i?.05:.09,t,to:amb,send:.7});tn({w:'triangle',f:96,f2:58,d:.1,g:i?.04:.08,t,to:amb,send:.4})})},1680);
+  // ab und zu passiert irgendwo in der Halle etwas
+  const events=[()=>metal(rnd(260,420),.05,.5,0,amb,.9),
+   ()=>nz({type:'highpass',f:2200,f2:1200,q:.7,a:.03,d:rnd(.5,.9),g:.05,to:amb,send:.6}),
+   ()=>{for(let i=0;i<7;i++)nz({f:rnd(900,1500),q:3,d:.03,g:.07,t:i*.11,to:amb,send:.8})},
+   ()=>[0,.22].forEach(t=>metal(rnd(180,240),.05,.35,t,amb,.9))];
+  const next=()=>setTimeout(()=>{if(running())events[Math.random()*events.length|0]();next()},rnd(2800,8000));next()}
+
+ return {play,loop,drag,
+  stopLoops(f){[...loops].forEach(l=>l.stop(f))},
+  duck(on,lvl){ducked=on?(lvl||.28):0;applyLevel()},
+  isMuted:()=>muted,
+  toggle(){muted=!muted;try{localStorage.setItem('fabrikTon',muted?'aus':'an')}catch(e){}applyLevel();return muted}};
+})();
+// TODO: Vorlesen durch eigene Sprachaufnahmen ersetzen (Texte werden selbst eingesprochen)
+/* Meister Lenz: Figur, Sprechblase und Stimme */
+const MEISTER=`<svg class="meister" viewBox="0 0 120 150" aria-hidden="true"><path d="M18 150c1-30 14-49 42-49s41 19 42 49z" fill="#f4f6f8" stroke="#c7ced3" stroke-width="2"/><path d="M60 104v46" stroke="#c7ced3" stroke-width="2"/><path d="M46 102l14 16 14-16 8 5-15 24-7-7-7 7-15-24z" fill="#fff" stroke="#c7ced3" stroke-width="1.5"/><circle cx="67" cy="128" r="2" fill="#9aa3a8"/><circle cx="67" cy="142" r="2" fill="#9aa3a8"/><ellipse cx="60" cy="60" rx="31" ry="35" fill="#dfae88"/><ellipse cx="29" cy="62" rx="5" ry="7" fill="#cf9b74"/><ellipse cx="91" cy="62" rx="5" ry="7" fill="#cf9b74"/><path d="M29 66c2 26 14 41 31 41s29-15 31-41c-5 7-10 9-15 7-5-2-10-3-16-3s-11 1-16 3c-5 2-10 0-15-7z" fill="#4a2e1b"/><path d="M41 73c6-6 13-6 19-3 6-3 13-3 19 3-6 3-13 2-19-1-6 3-13 4-19 1z" fill="#38210f"/><ellipse class="mouth" cx="60" cy="81" rx="7" ry="3.6" fill="#a4483c"/><ellipse cx="47" cy="55" rx="4" ry="4.6" fill="#fff"/><ellipse cx="73" cy="55" rx="4" ry="4.6" fill="#fff"/><circle cx="48" cy="56" r="2.5" fill="#2b1d12"/><circle cx="74" cy="56" r="2.5" fill="#2b1d12"/><path d="M39 46q8-5 15-1M66 45q8-4 15 1" stroke="#38210f" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M41 62q5 3 10 1M69 63q5 2 10-1" stroke="#c48e68" stroke-width="1.5" fill="none"/><path d="M26 44C21 12 42 5 60 5s39 7 34 39C81 33 39 33 26 44z" fill="#fff" stroke="#c7ced3" stroke-width="2"/><path d="M33 26q27-11 54 0M30 35q30-12 60 0" stroke="#dde3e7" stroke-width="1.6" fill="none"/></svg>`;
+// TODO: Vorlesen durch eigene Sprachaufnahmen ersetzen (alle Texte laufen über speak/say)
+const MALE=/Markus|Yannick|Viktor|Stefan|Conrad|Killian|Hans|Martin|Jonas|Florian|Bernd|Ralf|Lukas|Felix|Paul|male|männlich/i,FEMALE=/female|Anna|Petra|Helena|Katja|Hedda|Marlene|Vicki|Amala|Sandy|Shelley|Google Deutsch/i;
+let gVoice=null;
+function pickVoice(){if(!window.speechSynthesis)return;const de=speechSynthesis.getVoices().filter(v=>/^de/i.test(v.lang));gVoice=de.find(v=>MALE.test(v.name)&&!FEMALE.test(v.name))||null}
+if(window.speechSynthesis){pickVoice();try{speechSynthesis.addEventListener('voiceschanged',pickVoice)}catch(e){}}
+const ttsText=t=>t.replace(/<[^>]+>/g,'').replace(/Conchieren/g,'Konschieren').replace(/Conche/g,'Konsche').replace(/„|“/g,'');
+let speakId=0,speakTm=null,guideTm=null;
+function talk(on){document.querySelectorAll('.meister').forEach(m=>m.classList.toggle('talk',on))}
+function stopSpeech(){speakId++;clearTimeout(speakTm);if(window.speechSynthesis)speechSynthesis.cancel();talk(false);Sfx.duck(false)}
+// Liest satzweise vor (lange Texte brechen in manchen Browsern sonst ab) und meldet sich am Ende
+function speak(t,onDone,lvl){stopSpeech();const id=speakId;
+ const finish=()=>{if(id!==speakId)return;speakId++;clearTimeout(speakTm);talk(false);Sfx.duck(false);if(onDone)onDone()};
+ const clean=ttsText(t);if(!window.speechSynthesis||Sfx.isMuted()){speakTm=setTimeout(finish,clean.length*65+800);return} // ohne Ton: Lesezeit statt Vorlesen
+ const parts=clean.match(/[^.!?…]+[.!?…]*\s*/g)||[clean];let i=0;talk(true);Sfx.duck(true,lvl);
+ const next=()=>{if(id!==speakId)return;if(i>=parts.length){finish();return}
+  const u=new SpeechSynthesisUtterance(parts[i++].trim());u.lang='de-DE';u.rate=.95;if(gVoice)u.voice=gVoice;u.pitch=gVoice?.95:.72;u.onend=next;u.onerror=next;speechSynthesis.speak(u)};
+ next();speakTm=setTimeout(finish,clean.length*85+3500)} // falls ein Gerät das Ende nie meldet
+function hideGuide(){clearTimeout(guideTm);const g=$('#guide');if(g)g.hidden=true}
+/* Schülermodus: Beim ersten Mal läuft alles ganz durch. Überspringen geht erst, wenn es schon einmal vollständig lief.
+   Lehrermodus: Überspringen geht immer. Der Stand gilt pro Spieldurchgang und wird nicht gespeichert. */
+const heard=new Set();let teacher=false;
+const canSkip=k=>teacher||heard.has(k);
+function refreshSkips(){document.querySelectorAll('[data-skip]').forEach(b=>{b.hidden=!canSkip(b.dataset.skip)});nearCur='x'}
+function setTeacher(on){teacher=on;$('#tbadge').hidden=!on;refreshSkips();refreshTeacherBtn();teacherMenu()}
+function teacherMenu(){const m=$('#mteacher');if(!m)return;m.innerHTML=teacher?'<button class="btn" id="mteach">🎓 Lehrermodus beenden</button>':'';if(teacher)$('#mteach').onclick=()=>setTeacher(false)}
+function refreshTeacherBtn(){const b=$('#tstation');b.hidden=!teacher||done>=6;if(!b.hidden)b.textContent=`Station ${done+1} überspringen ⏭`}
+// Lehrermodus: aktuelle Station komplett auslassen und direkt zur nächsten springen
+function skipStation(){if(!teacher||scene||done>=6)return;if(modalOpen)hideModal();clearLines();stopSpeech();done++;dressed=true;load=done;dropped=null;target=null;keys.left=keys.right=false;
+ px=done<6?zone('#st'+done,STATIONS[done].x)[0]+40:3150;loadOrigin=px;updateCarry();renderGround();updateMarkers();nearCur='x'}
+let tTaps=0,tLast=0;
+addEventListener('pointerdown',e=>{const r=$('#menubtn').getBoundingClientRect(),corner=e.clientX<=Math.max(r.right,60)&&e.clientY<=r.bottom+8,inMenu=e.target.closest&&e.target.closest('#menuhead');
+ if(!corner&&!inMenu){tTaps=0;return}const n=performance.now();tTaps=n-tLast<700?tTaps+1:1;tLast=n;if(tTaps>=10){tTaps=0;setTeacher(true)}},{capture:true});
+addEventListener('selectstart',e=>{if(!(e.target.closest&&e.target.closest('input,textarea')))e.preventDefault()},{capture:true});
+const WAIT_TXT=()=>Sfx.isMuted()?'📖 Lies in Ruhe …':'👂 Hör Meister Lenz zu …';
+let sayQ=[],sayNow=null;
+const lineBlock=()=>[sayNow,...sayQ].some(l=>l&&!canSkip(l));
+function clearLines(){sayQ=[];sayNow=null;clearTimeout(guideTm);hideGuide()}
+function playLine(t){sayNow=t;clearTimeout(guideTm);$('#say').textContent=t;$('#gskip').dataset.skip=t;$('#guide').hidden=false;placeTip();refreshSkips();speak(t,()=>{heard.add(t);lineDone()},.4)}
+function lineDone(){sayNow=null;nearCur='x';if(sayQ.length)playLine(sayQ.shift());else guideTm=setTimeout(hideGuide,900)}
+function say(t){if(sayNow){if(sayNow!==t&&!sayQ.includes(t))sayQ.push(t);return}playLine(t)}
+function resumeLines(){if(!sayNow&&sayQ.length&&!modalOpen&&!scene)playLine(sayQ.shift())}
+const NEXT_LINE=['Sauber! Bring die Kiste jetzt zu Station 2 zum Rösten.',
+ 'Riechst du das? So duftet es, wenn Kakao geröstet wird. Weiter geht es zu Station 3.',
+ 'Aus den Kernen ist Kakaomasse geworden. Trag die Kanne zu Station 4.',
+ 'Jetzt ist es schon fast Schokolade. Ab damit zu Station 5, zur Conche.',
+ 'Schön glatt! Bring die Kanne zu Station 6. Dort kommt die Schokolade in Formen.',
+ 'Geschafft! Trag den Karton zur Laderampe. Der Lastwagen wartet schon.'];
+let saidDressed=false;
+
+/* ---------- Figur ---------- */
+const PLAYER=`<svg width="60" height="104" viewBox="0 0 60 104" overflow="visible" style="overflow:visible">
+<rect class="legL" x="21" y="70" width="8" height="30" rx="4" fill="#2f4a7a"/><rect class="legR" x="31" y="70" width="8" height="30" rx="4" fill="#28406b"/>
+<rect class="armL" x="12" y="42" width="7" height="24" rx="3.5" fill="#c98b5b"/>
+<rect class="shirt" x="17" y="38" width="27" height="36" rx="9" fill="#e85d3a"/>
+<path class="coat" d="M17 60H44V84Q30.5 87 17 84Z" fill="#f4f6f8" stroke="#cfd6db" stroke-width="1"/><path class="coat" d="M30.5 42V82" stroke="#cfd6db" stroke-width="1.2"/><circle class="coat" cx="33" cy="50" r="1.2" fill="#9aa3a8"/><circle class="coat" cx="33" cy="60" r="1.2" fill="#9aa3a8"/>
+<g class="frontload"></g><g class="armR"><g class="tool t-shovel" style="display:none"><path d="M43.5 60V95" stroke="#8a5a2b" stroke-width="3" stroke-linecap="round"/><path d="M37.5 93H49.5L48.5 104Q43.5 108 38.5 104Z" fill="#9aa3a8" stroke="#6f777c" stroke-width="1"/></g><rect x="40" y="42" width="7" height="24" rx="3.5" fill="#c98b5b"/></g>
+<circle cx="31" cy="26" r="13" fill="#c98b5b"/><circle cx="36" cy="26" r="1.8" fill="#222"/><path d="M33 31q3 2 6 0" stroke="#222" stroke-width="1.4" fill="none"/>
+<g class="hat"><ellipse cx="31" cy="16" rx="21" ry="5" fill="#e6c36a"/><rect x="21" y="5" width="20" height="12" rx="5" fill="#e6c36a"/><rect x="21" y="12" width="20" height="3" fill="#c0453a"/></g>
+<g class="cap"><path d="M17 20Q16 6 31 6Q46 6 45 20Q31 15 17 20Z" fill="#fff" stroke="#cfd6db"/><path d="M20 12Q31 9 42 12M19 16Q31 12 43 16" stroke="#dde3e7" stroke-width=".8" fill="none"/></g></svg>`;
+
+/* ---------- Gegenstände (Zeichnungen im 50x60-Raster) ---------- */
+const beanRows=(rows,col,stroke)=>rows.map(([cnt,y,x0,dx])=>Array.from({length:cnt},(_,k)=>`<ellipse cx="${x0+k*dx}" cy="${y}" rx="4.5" ry="3" fill="${col}" stroke="${stroke}" stroke-width=".6"/>`).join('')).join('');
+const BPOS=[[13,30],[21,30],[29,30],[37,30],[17,26.5],[25,26.5],[33,26.5],[21,23],[29,23]]; // unten zuerst
+const beansAt=(n,col,st)=>BPOS.slice(0,n).map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="4.5" ry="3" fill="${col}" stroke="${st}" stroke-width=".6"/>`).join('');
+const SACK=`<path d="M8 22Q6 12 16 10H34Q44 12 42 22Q48 40 42 58H8Q2 40 8 22Z" fill="#d6c094" stroke="#b89b62" stroke-width="2"/><path d="M14 13Q25 18 36 13" stroke="#8a6a3a" stroke-width="3" fill="none"/><path d="M10 30H40M9 40H41M10 50H40" stroke="#c4ab78" stroke-width="1.5"/><text x="25" y="41" font-size="9" font-weight="bold" text-anchor="middle" fill="#6b4423" font-family="Trebuchet MS,sans-serif">KAKAO</text>`;
+const SACK_EMPTY=`<path d="M6 50Q8 42 14 40H36Q44 42 44 50L46 58H4Z" fill="#d6c094" stroke="#b89b62" stroke-width="2"/><path d="M12 48H38" stroke="#c4ab78" stroke-width="1.5"/>`;
+const crate=n=>`${beansAt(n,'#7a4424','#5a3216')}<rect x="5" y="31" width="40" height="26" rx="2" fill="#c8964f"/><rect x="5" y="31" width="40" height="4" fill="#a87a3c"/><path d="M5 41H45M5 50H45" stroke="#a87a3c" stroke-width="2"/><path d="M12 35V57M38 35V57" stroke="#b08245" stroke-width="2"/>`;
+const tray=n=>`${BPOS.slice(0,n).map(([x,y])=>`<ellipse cx="${x}" cy="${y+12}" rx="4.5" ry="2.6" fill="#4a2a12" stroke="#2e1a0b" stroke-width=".6"/>`).join('')}<path d="M3 44H47L44 54H6Z" fill="#a9b2b7" stroke="#6f777c" stroke-width="1.5"/><path d="M8 49H42" stroke="#c9d0d4" stroke-width="1.2"/>`;
+const jug=(lvl,col,gloss)=>`<path d="M38 28L47 21L45 31Z" fill="#b8c0c5" stroke="#7d868c"/><path d="M12 25H38L40 56Q25 59 10 56Z" fill="#c9d0d4" stroke="#7d868c" stroke-width="1.5"/>${lvl?`<ellipse cx="25" cy="${27+(1-lvl)*24}" rx="${13-((1-lvl)*1)}" ry="3" fill="${col}"/>${gloss?`<ellipse cx="21" cy="${26.5+(1-lvl)*24}" rx="5" ry="1" fill="#fff" opacity=".4"/>`:''}`:''}<path d="M11 31Q3 38 11 46" stroke="#7d868c" stroke-width="3" fill="none"/><path d="M15 32V52" stroke="#fff" stroke-width="2" opacity=".5"/>`;
+const bucket=lvl=>`<path d="M8 27Q25 8 42 27" stroke="#7d868c" stroke-width="2" fill="none"/><path d="M9 27H41L37 57H13Z" fill="#e8892b" stroke="#b0631a" stroke-width="1.5"/>${lvl?`<ellipse cx="25" cy="${28+(1-lvl)*20}" rx="15" ry="3" fill="#7f4a26"/>`:''}<path d="M11 33H39" stroke="#f2a85a" stroke-width="2"/>`;
+// Schokoladen-Formen: Weihnachtsmann, Tafel, Schokobonbon (Mittelpunkt 0,0, ca. 20×26 Einheiten)
+const SIL={
+ santa:'M-4 -6a4 4 0 1 0 8 0a4 4 0 1 0 -8 0ZM-4.8 -8.2Q-1.5 -16.5 4.2 -13.6Q2.6 -11.6 4.6 -8.2ZM3.4 -13.4a1.6 1.6 0 1 0 3.2 0a1.6 1.6 0 1 0 -3.2 0ZM-4.4 -3.2Q-7.4 2 -6.6 10.5H6.6Q7.4 2 4.4 -3.2Z',
+ bar:'M-8 -12.5H8Q9 -12.5 9 -11.5V10Q9 11 8 11H-8Q-9 11 -9 10V-11.5Q-9 -12.5 -8 -12.5Z',
+ bonbon:'M-7.5 0A7.5 6.4 0 1 1 7.5 0A7.5 6.4 0 1 1 -7.5 0Z'};
+const DET={
+ santa:'<path d="M-5 -8.4H4.8" stroke-width="1.5"/><path d="M-3.3 -5.4Q0 2 3.3 -5.4"/><path d="M-1.6 -4.6Q0 -3.8 1.6 -4.6"/><circle cx="-1.5" cy="-7" r=".5"/><circle cx="1.5" cy="-7" r=".5"/><path d="M-6.2 4H6.2" stroke-width="1.3"/><rect x="-1.3" y="3" width="2.6" height="2" rx=".4"/><path d="M-4.2 -1.8Q-6.4 1.6 -3.2 3.2M4.2 -1.8Q6.4 1.6 3.2 3.2M0 -1V2.6M0 6V10"/>',
+ bar:'<path d="M0 -12V10.5M-8.5 -4.6H8.5M-8.5 2.8H8.5"/><path d="M-7 -11V-6.2H-1.5M1.5 -11V-6.2H7M-7 -3.2V1.4H-1.5M1.5 -3.2V1.4H7M-7 4.2V9.4H-1.5M1.5 4.2V9.4H7" opacity=".55"/>',
+ bonbon:'<path d="M-6.8 -.4Q0 1.6 6.8 -.4"/><path d="M-4.4 -3.6Q-1.8 -5.2 1.2 -4.8" opacity=".75"/>'};
+const choc=(t,x,y,sc=1,col='#6b3a1e')=>`<g transform="translate(${x} ${y}) scale(${sc})"><path d="${SIL[t]}" fill="${col}"/><g fill="none" stroke="#c4925f" stroke-width=".8" stroke-linecap="round" stroke-linejoin="round">${DET[t]}</g><path d="${SIL[t]}" fill="none" stroke="#2e1608" stroke-width=".5" opacity=".6"/></g>`;
+const santa=(x,y,sc=1,col='#6b3a1e')=>choc('santa',x,y,sc,col);
+const wrapped=(t,x,y,sc=1)=>`<g transform="translate(${x} ${y}) scale(${sc})">${
+ t==='santa'?`<path d="${SIL.santa}" fill="#c62f2f" stroke="#8f1f1f" stroke-width=".5"/><circle cy="-6.4" r="2.9" fill="#f6d7c3"/><path d="M-3.4 -5.6Q0 2.4 3.4 -5.6Q0 -3.4 -3.4 -5.6Z" fill="#fff"/><path d="M-5 -8.6H4.8" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><circle cx="5" cy="-13.4" r="1.7" fill="#fff"/><circle cx="-1.1" cy="-7.2" r=".45" fill="#333"/><circle cx="1.1" cy="-7.2" r=".45" fill="#333"/><path d="M-6.3 4H6.3" stroke="#2b2b2b" stroke-width="1.5"/><rect x="-1.4" y="2.9" width="2.8" height="2.2" rx=".3" fill="#f2c230"/><path d="M-4.4 -2Q-6 1 -5.6 4M3.6 -2.6Q5.8 -1 5.9 2" stroke="#fff" stroke-width=".7" opacity=".6" fill="none"/>`
+ :t==='bar'?`<path d="${SIL.bar}" fill="#5b3a9e" stroke="#3d2470" stroke-width=".5"/><rect x="-9" y="-12.5" width="18" height="3.4" fill="#d5dbe0"/><path d="M-9 -9.1H9" stroke="#9aa3a8" stroke-width=".4"/><rect x="-9" y="-2.6" width="18" height="7" fill="#fff8ec"/><ellipse cx="0" cy=".9" rx="2.6" ry="1.7" fill="#7a4521"/><path d="M0 -.6V2.4" stroke="#c88a55" stroke-width=".5"/><path d="M-6.5 -7V8" stroke="#fff" stroke-width=".8" opacity=".35"/>`
+ :`<path d="M-6 0L-12.5 -5Q-11 0 -12.5 5Z" fill="#e8b923" stroke="#b8860b" stroke-width=".5" stroke-linejoin="round"/><path d="M6 0L12.5 -5Q11 0 12.5 5Z" fill="#e8b923" stroke="#b8860b" stroke-width=".5" stroke-linejoin="round"/><ellipse rx="7" ry="6" fill="#f2c230" stroke="#b8860b" stroke-width=".6"/><path d="M-4 -2.6Q-1.8 -4.6 1 -4.4" stroke="#fff" stroke-width="1" fill="none" opacity=".7" stroke-linecap="round"/><path d="M-7 0H7" stroke="#c0453a" stroke-width="1.2"/>`}</g>`;
+const foilSanta=(x,y,sc=1)=>wrapped('santa',x,y,sc);
+const MIX=['bar','santa','bonbon','santa','bar'];         // Reihenfolge im Karton
+const MOLDT=['bar','santa','bonbon','santa'];             // die vier Gießformen
+const MOLDSC={bar:2.4,santa:2.5,bonbon:3};
+const SPOS=[[14,26],[25,24],[36,26],[19,31],[31,31]];
+const carton=n=>`<path d="M6 31L1 23H22L25 31Z" fill="#b98a52"/><path d="M44 31L49 23H28L25 31Z" fill="#b98a52"/>${SPOS.slice(0,n).map(([x,y],k)=>wrapped(MIX[k],x,y,MIX[k]==='bar'?.85:1)).join('')}<rect x="5" y="31" width="40" height="26" rx="1.5" fill="#c8964f"/><path d="M5 31H45" stroke="#a87a3c" stroke-width="2"/><rect x="16" y="39" width="18" height="12" rx="2" fill="#fffaf0"/>${santa(25,48,.62,'#c0453a')}`;
+const santaCrate=n=>`${SPOS.slice(0,n).map(([x,y])=>santa(x,y,1.05)).join('')}<rect x="5" y="31" width="40" height="26" rx="2" fill="#c8964f"/><rect x="5" y="31" width="40" height="4" fill="#a87a3c"/><path d="M5 41H45M5 50H45" stroke="#a87a3c" stroke-width="2"/>`;
+const COAT_ICON=`<svg viewBox="0 0 40 50" width="34" height="42"><path d="M8 14Q20 8 32 14L36 46H4Z" fill="#f4f6f8" stroke="#bfc8ce" stroke-width="1.5"/><path d="M20 12V46" stroke="#bfc8ce"/><path d="M8 4Q20 -2 32 4Q30 10 20 9Q10 10 8 4Z" fill="#fff" stroke="#bfc8ce"/></svg>`;
+
+// Index = Zwischenprodukt; Station i braucht CARRY[i] und liefert CARRY[i+1]
+const CARRY=[
+ {name:'einen Sack mit Kakaobohnen',short:'den Kakaosack',label:'Kakaosack',svg:SACK,empty:SACK_EMPTY},
+ {name:'eine Kiste mit sauberen Kakaobohnen',short:'die Kiste mit sauberen Bohnen',front:true,svg:crate(9),empty:crate(0)},
+ {name:'ein Blech mit gerösteten Bohnen',short:'das Blech mit gerösteten Bohnen',front:true,svg:tray(9),empty:tray(0)},
+ {name:'eine Kanne mit dickflüssiger Kakaomasse',short:'die Kanne mit Kakaomasse',front:true,svg:jug(1,'#3e220f'),empty:jug(0)},
+ {name:'einen Eimer mit Schokoladenmasse',short:'den Eimer mit Schokoladenmasse',front:true,svg:bucket(1),empty:bucket(0)},
+ {name:'eine Kanne mit flüssiger Schokolade',short:'die Kanne mit flüssiger Schokolade',front:true,svg:jug(1,'#5a2e14',true),empty:jug(0)},
+ {name:'einen Karton mit verpackter Schokolade',short:'den Karton mit verpackter Schokolade',front:true,svg:carton(5)}
+];
+const ITEMSVG=(inner)=>`<svg viewBox="0 12 50 48" width="54" height="52" style="overflow:visible">${inner}</svg>`;
+const carrySVG=(i,w=50,hh=60)=>`<svg viewBox="0 0 50 60" width="${w}" height="${hh}">${CARRY[i].svg}</svg>`;
+
+/* ---------- Tragen, Ablegen, Aufnehmen ---------- */
+let load=0,dressed=false,dropped=null,loadOrigin=140,junk=[],picking=false;
+const hasReq=i=>dressed&&load===i;
+const needText=i=>!dressed?'Kittel und Haube':CARRY[i].short;
+const FRONTLOAD=svg=>`<path d="M42 47Q54 47 63.5 54" stroke="#b87a4c" stroke-width="6.5" stroke-linecap="round" fill="none"/><g transform="translate(33 33) scale(.72)">${svg}</g><ellipse cx="64.5" cy="56" rx="3.6" ry="3.2" fill="#c98b5b"/>`;
+function popCarry(){const c=$('#carry');if(!c||!c.innerHTML)return;c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop')}
+function updateCarry(anim){const c=$('#carry');if(!c)return;
+ const it=load!==null?CARRY[load]:null,front=!!(it&&it.front);
+ $('#player').classList.toggle('dressed',dressed);
+ $('#player').classList.toggle('front',front);
+ document.querySelector('#player .frontload').innerHTML=front?FRONTLOAD(it.svg):'';
+ if(!it||front){c.innerHTML='';return}
+ c.innerHTML=carrySVG(load);if(anim)popCarry()}
+const STAND_SVG=(full)=>`<svg viewBox="0 0 60 150" width="60" height="150"><rect x="27" y="10" width="6" height="136" rx="3" fill="#7d868c"/><path d="M12 148H48" stroke="#5f676c" stroke-width="6" stroke-linecap="round"/><path d="M14 22H46" stroke="#7d868c" stroke-width="4" stroke-linecap="round"/><circle cx="30" cy="8" r="5" fill="#7d868c"/>
+ <g class="gear" style="opacity:${full?1:0}"><path d="M14 24Q30 18 46 24L50 92H10Z" fill="#f4f6f8" stroke="#bfc8ce" stroke-width="1.5"/><path d="M30 22V92" stroke="#bfc8ce"/><circle cx="33" cy="40" r="1.4" fill="#9aa3a8"/><circle cx="33" cy="55" r="1.4" fill="#9aa3a8"/><path d="M18 6Q30 -1 42 6Q40 13 30 12Q20 13 18 6Z" fill="#fff" stroke="#bfc8ce"/></g>
+ <rect x="8" y="104" width="44" height="16" rx="3" fill="#fff" stroke="#5a83c4" stroke-width="2"/><text x="30" y="115.5" font-size="8.5" text-anchor="middle" fill="#2f4a7a" font-weight="bold" font-family="Trebuchet MS,sans-serif">HYGIENE</text></svg>`;
+function renderGround(){const el=$('#ground');if(!el)return;
+ let html=`<div id="stand" class="${!dressed&&done===0?'want':''}" style="left:${HX}px">${STAND_SVG(!dressed)}</div>`;
+ junk.forEach(j=>html+=`<div class="gbowl gempty" style="left:${j.x}px">${j.html}</div>`);
+ if(dropped)html+=`<div class="gbowl gdrop want" style="left:${dropped.x}px">${ITEMSVG(CARRY[dropped.idx].svg)}</div>`;
+ el.innerHTML=html}
+function worldCenter(el){const r=el.getBoundingClientRect(),wr=$('#world').getBoundingClientRect();return {x:(r.left+r.width/2-wr.left)/s,y:(r.top+r.height/2-wr.top)/s}}
+function flyToPlayer(html,from,w,hh,ox,oy,dur,onDone){
+ const d=document.createElement('div');d.style.cssText=`position:absolute;left:0;top:0;width:${w}px;height:${hh}px;z-index:4;line-height:0;pointer-events:none;will-change:transform`;d.innerHTML=html;$('#world').appendChild(d);
+ const t0=performance.now();
+ const step=t=>{const k=Math.min(1,(t-t0)/dur),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+  const tx=px+dir*ox,ty=404-oy,cx=from.x+(tx-from.x)*e,cy=from.y+(ty-from.y)*e-Math.sin(Math.PI*k)*22;
+  d.style.transform=`translate(${cx-w/2}px,${cy-hh/2}px) scale(${1-.15*e})`;d.style.opacity=k>.8?(1-k)/.2:1;
+  if(k<1)requestAnimationFrame(step);else{d.remove();onDone()}};
+ requestAnimationFrame(step)}
+function flyFromPlayer(html,w,hh,ox,oy,to,dur,onDone){
+ const d=document.createElement('div');d.style.cssText=`position:absolute;left:0;top:0;width:${w}px;height:${hh}px;z-index:4;line-height:0;pointer-events:none;will-change:transform`;d.innerHTML=html;$('#world').appendChild(d);
+ const sx=px+dir*ox,sy=404-oy-playerLift,t0=performance.now();
+ const step=t=>{const k=Math.min(1,(t-t0)/dur),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+  const cx=sx+(to.x-sx)*e,cy=sy+(to.y-sy)*e-Math.sin(Math.PI*k)*18;
+  d.style.transform=`translate(${cx-w/2}px,${cy-hh/2}px) scale(${.85+.15*e})`;
+  if(k<1)requestAnimationFrame(step);else{d.remove();onDone()}};
+ requestAnimationFrame(step)}
+// alles passiert flüssig im Vorbeigehen
+function autoPickup(){if(picking)return;
+ // Hygieneschleuse: vorwärts Kittel und Haube anziehen, rückwärts wieder aufhängen
+ if(!dressed&&dir===1&&Math.abs(px-HX)<26){picking=true;const g=document.querySelector('#stand .gear');const from=g?worldCenter(g):{x:HX,y:404-100};if(g)g.style.opacity=0;setAct('reach');
+  flyToPlayer(COAT_ICON,from,34,42,4,60,380,()=>{dressed=true;picking=false;setAct(null);updateCarry();renderGround();updateMarkers();nearCur='x';if(!saidDressed){saidDressed=true;say('Sehr gut! Mit Kittel und Haube darfst du an die Maschinen. Nimm den Kakaosack mit zu Station 1.')}});return}
+ if(dressed&&dir===-1&&Math.abs(px-HX)<26){picking=true;dressed=false;updateCarry();setAct('reach');
+  flyFromPlayer(COAT_ICON,34,42,4,60,{x:HX,y:404-100},360,()=>{picking=false;setAct(null);renderGround();updateMarkers();nearCur='x'});return}
+ // Zurückgehen mit Zwischenprodukt: genau dort ablegen, wo man es bekommen/aufgehoben hat
+ if(load!==null&&!dropped&&loadOrigin!==null&&dir===-1&&px<loadOrigin-22){
+  const idx=load,x=loadOrigin,front=!!CARRY[idx].front;picking=true;load=null;updateCarry();setAct('reach');
+  flyFromPlayer(ITEMSVG(CARRY[idx].svg),54,52,front?24:-18,front?40:62,{x,y:404-26},340,()=>{dropped={idx,x};picking=false;setAct(null);renderGround();updateMarkers();nearCur='x'});return}
+ // Vorwärtsgehen: abgelegtes Zwischenprodukt wieder mitnehmen
+ if(dropped&&load===null&&dir===1&&Math.abs(px-dropped.x)<30){
+  const g=document.querySelector('#ground .gdrop');const from=g?worldCenter(g):{x:dropped.x,y:404-26};const idx=dropped.idx,front=!!CARRY[idx].front;picking=true;
+  dropped=null;renderGround();setAct('reach');
+  flyToPlayer(ITEMSVG(CARRY[idx].svg),from,54,52,front?24:-18,front?40:62,360,()=>{load=idx;loadOrigin=from.x;picking=false;setAct(null);updateCarry(true);updateMarkers();nearCur='x'});return}
+}
+
+/* ---------- Maschinen (Requisiten an den Stationen) ---------- */
+const PROPS=[
+ // 0 Reinigung: Trichter, Rüttelband, Steine-Behälter
+ `<svg width="220" height="130" viewBox="0 0 220 130"><g class="stool"><rect x="2" y="104" width="28" height="6" rx="2" fill="#b08245"/><rect x="5" y="110" width="4" height="20" fill="#8a5a2b"/><rect x="23" y="110" width="4" height="20" fill="#8a5a2b"/><rect x="7" y="120" width="18" height="3" fill="#8a5a2b"/></g><g transform="translate(30 0)"><path d="M8 22H66L50 58H24Z" fill="#9aa8b0" stroke="#6f7c84" stroke-width="2"/><rect x="30" y="58" width="14" height="10" fill="#7d8a92"/>
+  <rect x="40" y="80" width="6" height="50" fill="#6f7c84"/><rect x="160" y="80" width="6" height="50" fill="#6f7c84"/>
+  <rect x="86" y="98" width="38" height="32" rx="3" fill="#6f7c84"/><text x="105" y="118" font-size="8" fill="#fff" text-anchor="middle" font-weight="bold" font-family="Trebuchet MS,sans-serif">Steine</text>
+  <rect x="28" y="68" width="152" height="12" rx="6" fill="#4b5359"/><line class="p-dash" x1="34" y1="74" x2="174" y2="74" stroke="#9aa3a8" stroke-width="3" stroke-dasharray="6 6"/>
+  ${[0,1,2,3,4].map(k=>`<circle cx="${90+k*8}" cy="74" r="1.6" fill="#2b3135"/>`).join('')}<path d="M176 74L186 84" stroke="#4b5359" stroke-width="4" stroke-linecap="round"/></g></svg>`,
+ // 1 Röster: Leiter, Trichter, Trommel, Feuer
+ `<svg width="214" height="160" viewBox="0 0 214 160"><g class="ladder"><rect x="4" y="34" width="4" height="126" rx="2" fill="#c8964f"/><rect x="20" y="34" width="4" height="126" rx="2" fill="#c8964f"/>${[46,62,78,94,110,126,142].map(y=>`<rect x="4" y="${y}" width="20" height="3.5" rx="1.5" fill="#a87a3c"/>`).join('')}</g><g transform="translate(24 0)"><path d="M20 8H62L50 34H32Z" fill="#9aa8b0" stroke="#6f7c84" stroke-width="2"/><rect x="36" y="34" width="10" height="10" fill="#7d8a92"/>
+  <rect x="24" y="106" width="8" height="54" fill="#6f7c84"/><rect x="142" y="106" width="8" height="54" fill="#6f7c84"/><rect x="30" y="134" width="112" height="8" rx="3" fill="#444"/>
+  <g>${[0,1,2,3,4,5].map(k=>`<path class="p-flame" d="M${44+k*18} 134Q${38+k*18} 124 ${44+k*18} 112Q${50+k*18} 124 ${44+k*18} 134Z" fill="${k%2?'#f7a531':'#e8542b'}"/>`).join('')}</g>
+  <rect x="20" y="44" width="130" height="62" rx="31" fill="#b0b8bd" stroke="#6f7c84" stroke-width="4"/>${[58,75,92].map(y=>`<line class="p-dash" x1="38" y1="${y}" x2="132" y2="${y}" stroke="#8a949a" stroke-width="4" stroke-dasharray="10 8"/>`).join('')}
+  <circle class="p-door" cx="150" cy="75" r="13" fill="#5f676c" stroke="#3e4549" stroke-width="3"/><rect x="60" y="18" width="50" height="16" rx="4" fill="#fff" stroke="#6f7c84"/><text x="85" y="29.5" font-size="9" text-anchor="middle" font-weight="bold" fill="#c0453a" font-family="Trebuchet MS,sans-serif">130 °C</text></g></svg>`,
+ // 2 Brechen und Mahlen (mit Leiter): Brecher, Gebläse, Schalen-Behälter, Mühle mit Rad
+ `<svg width="214" height="160" viewBox="0 0 214 160"><g class="ladder"><rect x="4" y="34" width="4" height="126" rx="2" fill="#c8964f"/><rect x="20" y="34" width="4" height="126" rx="2" fill="#c8964f"/>${[46,62,78,94,110,126,142].map(y=>`<rect x="4" y="${y}" width="20" height="3.5" rx="1.5" fill="#a87a3c"/>`).join('')}</g><g transform="translate(24 0)"><path d="M18 10H60L50 34H28Z" fill="#9aa8b0" stroke="#6f7c84" stroke-width="2"/>
+  <g class="p-crusher"><rect x="16" y="34" width="58" height="40" rx="6" fill="#c46a3a" stroke="#8f4a26" stroke-width="2"/><path d="M22 54L30 46L38 54L46 46L54 54L62 46L70 54" stroke="#f3d2b5" stroke-width="2.5" fill="none"/></g>
+  <circle cx="100" cy="46" r="17" fill="#d9dee1" stroke="#6f7c84" stroke-width="2"/><g class="p-fan">${[0,90,180,270].map(a=>`<ellipse cx="100" cy="38" rx="4" ry="8" fill="#7d868c" transform="rotate(${a} 100 46)"/>`).join('')}</g><circle cx="100" cy="46" r="3" fill="#3e4549"/>
+  <rect x="124" y="40" width="44" height="40" rx="4" fill="#a37445"/><text x="146" y="64" font-size="8" text-anchor="middle" fill="#fff" font-weight="bold" font-family="Trebuchet MS,sans-serif">Schalen</text>
+  <rect x="22" y="86" width="52" height="46" rx="4" fill="#8a949a" stroke="#5f676c" stroke-width="2"/><rect x="40" y="74" width="12" height="12" fill="#7d868c"/>
+  <g class="p-wheel"><circle cx="48" cy="109" r="16" fill="none" stroke="#3e4549" stroke-width="4"/>${[0,60,120].map(a=>`<line x1="32" y1="109" x2="64" y2="109" stroke="#3e4549" stroke-width="3" transform="rotate(${a} 48 109)"/>`).join('')}</g>
+  <path d="M74 118L94 124V130L74 126Z" fill="#6f7c84"/><rect x="26" y="132" width="8" height="28" fill="#6f7c84"/><rect x="62" y="132" width="8" height="28" fill="#6f7c84"/></g></svg>`,
+ // 3 Mischer: Schüssel mit Rührarm, Säcke Zucker und Milchpulver
+ `<svg width="320" height="170" viewBox="0 0 320 170"><g class="stool" transform="translate(40 0)"><rect x="2" y="144" width="28" height="6" rx="2" fill="#b08245"/><rect x="5" y="150" width="4" height="20" fill="#8a5a2b"/><rect x="23" y="150" width="4" height="20" fill="#8a5a2b"/><rect x="7" y="160" width="18" height="3" fill="#8a5a2b"/></g><g transform="translate(30 0)"><rect x="150" y="32" width="14" height="128" rx="3" fill="#8a949a"/><rect x="60" y="32" width="104" height="12" rx="4" fill="#8a949a"/><rect x="96" y="44" width="8" height="40" fill="#6f7c84"/>
+  <rect x="48" y="82" width="6" height="82" fill="#6f7c84"/><rect x="30" y="160" width="150" height="10" rx="3" fill="#5f676c"/>
+  <path d="M40 72Q100 152 160 72Z" fill="#c9d0d4" stroke="#7d868c" stroke-width="3"/><ellipse class="p-mix" cx="100" cy="76" rx="54" ry="8" fill="#3e220f" opacity="0"/>
+  <g class="p-paddle"><rect x="84" y="78" width="32" height="10" rx="5" fill="#6f7c84"/></g><rect x="96" y="110" width="8" height="10" fill="#7d868c"/>
+  <g><path d="M198 78Q196 72 204 70H228Q236 72 234 78L236 122H196Z" fill="#fff" stroke="#c9ccd0" stroke-width="2"/><text x="216" y="101" font-size="8" text-anchor="middle" font-weight="bold" fill="#5a83c4" font-family="Trebuchet MS,sans-serif">Zucker</text></g>
+  <g><path d="M196 126Q194 120 202 118H230Q238 120 236 126L238 170H194Z" fill="#f3ead6" stroke="#d6c7a6" stroke-width="2"/><text x="216" y="146" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#8a6a3a" font-family="Trebuchet MS,sans-serif">Milch-</text><text x="216" y="155" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#8a6a3a" font-family="Trebuchet MS,sans-serif">pulver</text></g>
+  <g><path d="M242 126Q240 120 248 118H276Q284 120 282 126L284 170H240Z" fill="#f6e7b0" stroke="#d9bf72" stroke-width="2"/><text x="262" y="146" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#8a6a3a" font-family="Trebuchet MS,sans-serif">Kakao-</text><text x="262" y="155" font-size="7.5" text-anchor="middle" font-weight="bold" fill="#8a6a3a" font-family="Trebuchet MS,sans-serif">butter</text></g></g></svg>`,
+ // 4 Conche: alter Längsreiber nach Lindt – Trog und Walze aus Granit, Schubstange, Schwungrad
+ `<svg width="240" height="150" viewBox="0 0 240 150"><path d="M205 34L211 0M233 34L227 0" stroke="#5a4632" stroke-width="3"/>
+  <rect x="222" y="66" width="8" height="84" fill="#5f676c"/><rect x="34" y="116" width="152" height="34" fill="#a5674a"/><path d="M34 125H186M34 134H186M34 143H186" stroke="#d8c3ad" stroke-width="1.5"/><path d="M60 116V125M100 116V125M140 116V125M80 125V134M120 125V134M160 125V134M60 134V143M100 134V143M140 134V143" stroke="#d8c3ad" stroke-width="1.5"/>
+  <path d="M22 66Q24 106 46 108H174Q196 106 198 66Z" fill="#7d7f7a"/>
+  <path class="p-wavy" d="M24 88Q34 83 44 88T64 88T84 88T104 88T124 88T144 88T164 88T184 88T196 88Q194 106 174 108H46Q26 106 24 88Z" fill="#7f4a26" opacity="0"/>
+  <path class="p-smooth" d="M24 86H196Q194 106 174 108H46Q26 106 24 86Z" fill="#6a3a1c" opacity="0"/><path class="p-smooth" d="M44 91H130" stroke="#fff" stroke-width="2" opacity="0"/>
+  <g class="p-roller"><line x1="58" y1="58" x2="58" y2="88" stroke="#5f676c" stroke-width="4"/><line x1="58" y1="58" x2="240" y2="58" stroke="#5f676c" stroke-width="4"/><g class="p-rstone"><circle cx="58" cy="88" r="16" fill="#8d8f8c" stroke="#5f615c" stroke-width="2"/><path d="M43 88H73M58 73V103" stroke="#70726d" stroke-width="2"/><circle cx="52" cy="82" r="1.3" fill="#c9cac6"/><circle cx="65" cy="93" r="1.3" fill="#c9cac6"/><circle cx="64" cy="80" r="1.1" fill="#5f615c"/><circle cx="58" cy="88" r="3.5" fill="#3e4549"/></g></g>
+  <path d="M8 66Q10 118 44 120H176Q210 118 212 66H198Q196 106 174 108H46Q24 106 22 66Z" fill="#a9aaa6" stroke="#73756f" stroke-width="2"/>${[[14,84],[28,110],[60,114],[104,113],[150,115],[190,108],[206,82]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.2" fill="#6f716c"/>`).join('')}
+  <path d="M203 100L232 110V116L203 110Z" fill="#8d8f8c" stroke="#73756f" stroke-width="1.5"/>
+  <rect x="214" y="46" width="26" height="24" rx="3" fill="#5f676c"/>
+  <g class="p-fly"><circle cx="219" cy="34" r="19" fill="none" stroke="#3e4549" stroke-width="4"/>${[0,60,120].map(a=>`<line x1="200" y1="34" x2="238" y2="34" stroke="#3e4549" stroke-width="2.5" transform="rotate(${a} 219 34)"/>`).join('')}<circle cx="219" cy="34" r="4" fill="#3e4549"/></g>
+  <circle cx="30" cy="26" r="16" fill="#fff" stroke="#3e4549" stroke-width="2.5"/>${[0,90,180,270].map(a=>`<line x1="30" y1="12" x2="30" y2="15" stroke="#3e4549" stroke-width="2" transform="rotate(${a} 30 26)"/>`).join('')}<line class="p-hand" x1="30" y1="26" x2="30" y2="15" stroke="#c0453a" stroke-width="2.5" stroke-linecap="round"/><circle cx="30" cy="26" r="2" fill="#3e4549"/></svg>`,
+ // 5 Formen und Kühltunnel
+ `<svg width="300" height="150" viewBox="0 0 300 150"><rect x="0" y="96" width="112" height="8" rx="2" fill="#8a949a"/><rect x="8" y="104" width="6" height="46" fill="#6f7c84"/><rect x="98" y="104" width="6" height="46" fill="#6f7c84"/>
+  <defs>${[0,1,2,3].map(k=>`<clipPath id="mc${k}"><path transform="translate(${19+k*26} 80) scale(${MOLDSC[MOLDT[k]]*.45})" d="${SIL[MOLDT[k]]}"/></clipPath>`).join('')}</defs>
+  <g class="p-molds">${[0,1,2,3].map(k=>`<g><rect x="${6+k*26}" y="62" width="26" height="34" rx="3" fill="#e6ecef" stroke="#9aa3a8"/><path transform="translate(${19+k*26} 80) scale(${MOLDSC[MOLDT[k]]*.45})" d="${SIL[MOLDT[k]]}" fill="#c9d0d4" stroke="#9aa3a8" stroke-width="1.6"/><g class="p-fill" data-k="${k}" opacity="0"><rect x="${6+k*26}" y="60" width="26" height="36" fill="#5a2e14" clip-path="url(#mc${k})"/><g transform="translate(${19+k*26} 80) scale(${MOLDSC[MOLDT[k]]*.45})" fill="none" stroke="#2a1205" stroke-width="1.1" stroke-linecap="round" opacity=".8">${DET[MOLDT[k]]}</g></g></g>`).join('')}</g>
+  <rect x="112" y="108" width="188" height="8" rx="3" fill="#4b5359"/><line class="p-dash" x1="116" y1="112" x2="296" y2="112" stroke="#9aa3a8" stroke-width="2.5" stroke-dasharray="6 6"/>
+  <rect x="122" y="52" width="100" height="56" rx="10" fill="#9fd0ee" stroke="#5a8fb5" stroke-width="3"/><rect x="132" y="70" width="80" height="38" fill="#5a8fb5" opacity=".35"/><text x="172" y="66" font-size="9" text-anchor="middle" font-weight="bold" fill="#2f4a7a" font-family="Trebuchet MS,sans-serif">❄ Kühltunnel</text>
+  <rect x="226" y="116" width="6" height="34" fill="#6f7c84"/><rect x="126" y="116" width="6" height="34" fill="#6f7c84"/><rect x="288" y="116" width="6" height="34" fill="#6f7c84"/>
+  <rect x="236" y="60" width="56" height="48" rx="6" fill="#e8892b" stroke="#b0631a" stroke-width="3"/><rect x="244" y="84" width="40" height="24" fill="#7a4a24" opacity=".45"/><g class="p-roll"><circle cx="264" cy="52" r="11" fill="#c0453a" stroke="#8f2f26" stroke-width="2"/><circle cx="264" cy="52" r="4" fill="#f2c230"/></g><text x="264" y="77" font-size="8" text-anchor="middle" font-weight="bold" fill="#fff" font-family="Trebuchet MS,sans-serif">Verpackung</text></svg>`
+];
+// Deko in der Halle
+function decoPallet(r){const n=1+Math.floor(r()*3);return `<svg width="100" height="80" viewBox="0 0 100 80"><rect x="2" y="70" width="96" height="10" fill="#b08245"/><rect x="8" y="76" width="10" height="4" fill="#7a5532"/><rect x="45" y="76" width="10" height="4" fill="#7a5532"/><rect x="82" y="76" width="10" height="4" fill="#7a5532"/>${Array.from({length:n},(_,k)=>`<g transform="translate(${6+k*30} 14) scale(.62)">${SACK}</g>`).join('')}</svg>`}
+function decoShelf(){return `<svg width="90" height="150" viewBox="0 0 90 150"><rect x="4" y="0" width="5" height="150" fill="#5a83c4"/><rect x="81" y="0" width="5" height="150" fill="#5a83c4"/>${[40,85,130].map(y=>`<rect x="4" y="${y}" width="82" height="5" fill="#f2a531"/>`).join('')}${[[12,18,'#c8964f'],[44,22,'#d6c094'],[14,63,'#e8892b'],[50,60,'#c8964f'],[20,108,'#d6c094'],[52,106,'#c8964f']].map(([x,y,c])=>`<rect x="${x}" y="${y}" width="28" height="${(y%45)>20?22:20}" rx="2" fill="${c}"/>`).join('')}</svg>`}
+function decoExt(){return `<svg width="40" height="80" viewBox="0 0 40 80"><rect x="4" y="0" width="32" height="26" rx="3" fill="#fff" stroke="#c0453a" stroke-width="2"/><text x="20" y="17" font-size="12" text-anchor="middle" fill="#c0453a" font-family="Trebuchet MS,sans-serif">🧯</text><rect x="12" y="34" width="16" height="44" rx="7" fill="#d9542b"/><rect x="15" y="30" width="10" height="6" fill="#333"/></svg>`}
+
+/* ---------- Stationen ---------- */
+const STATIONS=[
+{x:640,name:'Reinigen',title:'Die Bohnen werden gereinigt',
+ intro:'Willkommen in der Fabrik! Die Kakaosäcke vom Hafen sind angekommen. Zuerst müssen die Bohnen sauber sein: Beim Trocknen auf der Plantage sind manchmal Steinchen, Stöckchen oder Blätter dazwischen geraten.',
+ task:'Tippe alles an, was nicht in die Schokolade gehört.',
+ fact:'In der Fabrik sortieren Maschinen mit Sieben, Magneten und Luftgebläsen alles aus, was nicht in die Schokolade gehört.',
+ setup(a,api){
+  a.innerHTML=`<div class="stage"><div class="sv"><svg viewBox="0 0 400 250" width="100%" height="100%" style="position:absolute;inset:0"><ellipse cx="170" cy="140" rx="150" ry="80" fill="#9aa3a8"/><ellipse cx="170" cy="134" rx="138" ry="70" fill="#c9d0d4"/>${Array.from({length:60},(_,k)=>[50+(k%12)*21,92+Math.floor(k/12)*20]).filter(([x,y])=>((x-170)/126)**2+((y-134)/60)**2<1).map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.6" fill="#9aa3a8"/>`).join('')}</svg><div class="bin" style="width:20%;height:28%;right:0;bottom:3%">🗑️<br>Abfall</div></div></div>`;
+  const st=a.querySelector('.sv');let n=0;
+  const BEANSVG='<svg viewBox="-14 -10 28 20" width="34" height="24"><ellipse rx="12" ry="8" fill="#7a4424" stroke="#5a3216" stroke-width="1.2"/><path d="M-8 0Q0 -3 8 0" stroke="#5a3216" stroke-width="1.2" fill="none"/></svg>';
+  const BAD=[['<svg viewBox="-14 -12 28 24" width="36" height="30"><path d="M-11 4L-7 -8L5 -10L12 -2L8 9L-6 10Z" fill="#8c8f92" stroke="#5f6366" stroke-width="1.2"/></svg>','Stein'],
+   ['<svg viewBox="-20 -8 40 16" width="48" height="20"><path d="M-17 3L16 -2" stroke="#7a5532" stroke-width="3.5" stroke-linecap="round"/><path d="M2 0L8 -6" stroke="#7a5532" stroke-width="2.5" stroke-linecap="round"/></svg>','Stöckchen'],
+   ['<svg viewBox="-14 -10 28 20" width="36" height="26"><path d="M-12 4Q-2 -14 13 -4Q2 12 -12 4Z" fill="#6fae3e"/><path d="M-12 4Q0 -2 13 -4" stroke="#3f7d2c" stroke-width="1.2" fill="none"/></svg>','Blatt'],
+   ['<svg viewBox="-14 -12 28 24" width="30" height="26"><path d="M-9 6L-6 -7L6 -8L10 3L2 10Z" fill="#a9a29a" stroke="#6f6a64" stroke-width="1.2"/></svg>','Stein'],
+   ['<svg viewBox="-16 -10 32 20" width="40" height="24"><path d="M-14 0Q-6 -9 0 0T14 0" stroke="#d9c58f" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>','Schnurrest']];
+  const P=[[34,38],[47,38],[24,47],[35,47],[46,47],[58,47],[22,57],[33,57],[44,57],[55,57],[65,57],[32,67],[44,67],[56,67]];
+  const badIdx=[2,6,9,12,4];let bi=0;
+  P.forEach(([l,t],i)=>{const isBad=badIdx.includes(i);const b=document.createElement('button');b.className='tapit';b.style.left=l+'%';b.style.top=t+'%';
+   const def=isBad?BAD[bi++]:null;b.innerHTML=isBad?def[0]:BEANSVG;b.style.width=(parseFloat(b.querySelector('svg').getAttribute('width'))/4)+'%';b.setAttribute('aria-label',isBad?def[1]:'Kakaobohne');
+   b.onclick=()=>{if(b.dataset.gone)return;
+    if(!isBad){b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');api.hint('Das ist eine gute Kakaobohne – die bleibt drin!');return}
+    b.dataset.gone=1;const br=b.getBoundingClientRect(),sr=st.querySelector('.bin').getBoundingClientRect();
+    b.animate([{transform:'translate(-50%,-50%)'},{transform:`translate(calc(-50% + ${(sr.left+sr.width/2-br.left-br.width/2)*.5}px),calc(-50% + ${(sr.top-br.top)*.5-60}px))`},{transform:`translate(calc(-50% + ${sr.left+sr.width/2-br.left-br.width/2}px),calc(-50% + ${sr.top+20-br.top}px)) scale(.5)`,opacity:0}],{duration:600,fill:'forwards',easing:'ease-in'});
+    Sfx.play('stone',.8,520);n++;api.count(n,5);api.hint(n<5?`Gut gemacht – ${def[1]} aussortiert!`:'Alles sauber!',true);if(n===5)api.done()};
+   st.appendChild(b)});
+  api.count(0,5);
+ }},
+{x:1080,name:'Rösten',title:'Die Bohnen werden geröstet',
+ intro:'Die sauberen Bohnen kommen in eine große, heiße Trommel und werden geröstet – so ähnlich wie Nüsse in der Pfanne. Erst dadurch riecht und schmeckt es nach Schokolade. Aber Vorsicht: Werden die Bohnen zu heiß, verbrennen sie und schmecken bitter.',
+ task:'Starte die Trommel und drücke „Stopp“, wenn die Bohnen goldbraun sind.',
+ fact:'Beim Rösten riecht es in der ganzen Fabrik nach Kakao. Die Trommel ist ungefähr 120 bis 140 Grad Celsius heiß – viel heißer als ein Sommertag!',
+ setup(a,api){
+  a.innerHTML=`<div class="stage"><svg viewBox="0 0 400 250" width="100%" height="100%" style="position:absolute;inset:0"><rect x="60" y="60" width="210" height="110" rx="55" fill="#b0b8bd" stroke="#6f7c84" stroke-width="6"/><g id="rdr">${[90,115,140].map(y=>`<line x1="95" y1="${y}" x2="235" y2="${y}" stroke="#8a949a" stroke-width="6" stroke-dasharray="16 12"/>`).join('')}</g>
+   ${[0,1,2,3,4,5,6].map(k=>`<path class="rfl" d="M${90+k*25} 210Q${82+k*25} 196 ${90+k*25} 180Q${98+k*25} 196 ${90+k*25} 210Z" fill="${k%2?'#f7a531':'#e8542b'}" opacity=".25"/>`).join('')}
+   <circle cx="330" cy="115" r="42" fill="#fff" stroke="#6f7c84" stroke-width="4"/><g id="rbeans">${[[312,102],[330,98],[348,104],[318,122],[338,124],[328,111]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="9" ry="6" fill="#9a5a32" stroke="rgba(0,0,0,.25)"/>`).join('')}</g><text x="330" y="175" font-size="14" text-anchor="middle" font-weight="bold" fill="#3a2414">Probe</text></svg></div>
+   <div class="roastbar"><div class="zl" style="left:0;width:55%">zu hell</div><div class="zl" style="left:55%;width:25%">goldbraun ✓</div><div class="zl" style="left:80%;width:20%;color:#fff">verbrannt</div><div class="mk" id="rmk" style="left:0"></div></div>
+   <div class="row"><button class="btn" id="rgo">🔥 Rösten starten</button></div>`;
+  let lv=0,iv=null,running=false,rs=null;const quiet=()=>{if(rs){rs.stop();rs=null}};const mk=a.querySelector('#rmk'),go=a.querySelector('#rgo'),bs=a.querySelectorAll('#rbeans ellipse'),fl=a.querySelectorAll('.rfl'),dr=a.querySelector('#rdr');
+  const c0=[154,90,50],c1=[74,42,18],c2=[25,15,8];
+  const paint=()=>{mk.style.left=lv+'%';const k=lv/100;const c=k<.7?c0.map((v,i)=>Math.round(v+(c1[i]-v)*(k/.7))):c1.map((v,i)=>Math.round(v+(c2[i]-v)*((k-.7)/.3)));bs.forEach(b=>b.setAttribute('fill',`rgb(${c})`))};
+  const stop=burnt=>{clearInterval(iv);iv=null;running=false;quiet();fl.forEach(f=>f.setAttribute('opacity','.25'));dr.style.animation='';
+   if(!burnt&&lv>=55&&lv<80){go.disabled=true;api.hint('Perfekt goldbraun! Riechst du die Schokolade?',true);api.count('✓','');api.done();return}
+   api.hint(burnt||lv>=80?'Oh nein, verbrannt! Das schmeckt bitter. Versuch es nochmal.':'Noch zu hell – die Bohnen schmecken noch nicht nach Schokolade. Nochmal!');
+   go.textContent='↺ Nochmal rösten'};
+  go.onclick=()=>{if(running){stop(false);return}
+   lv=0;paint();running=true;quiet();rs=Sfx.loop('roast');go.textContent='✋ Stopp!';api.hint('Die Trommel dreht sich …',true);fl.forEach(f=>f.setAttribute('opacity','1'));
+   dr.animate([{transform:'translateX(0)'},{transform:'translateX(-28px)'}],{duration:500,iterations:Infinity});
+   iv=setInterval(()=>{lv=Math.min(100,lv+1.4);paint();if(lv>=100)stop(true)},90)};
+  paint();api.count('🔥','');
+  return()=>{clearInterval(iv);quiet()};
+ }},
+{x:1520,name:'Mahlen',title:'Brechen, schälen und mahlen',
+ intro:'Jetzt werden die gerösteten Bohnen geknackt. Die dünne Schale kommt weg – für Schokolade braucht man nur das Innere, die Kakaokerne. Die Kerne werden dann ganz fein gemahlen. Dabei passiert etwas Erstaunliches: Aus den festen Kernen wird eine dickflüssige, braune Masse! Sie besteht aus Kakaobutter und braunen Kakaoteilchen.',
+ task:'Knacke alle Bohnen, puste die Schalen weg und dreh die Mühle.',
+ fact:'In den Kakaokernen steckt viel Fett: die Kakaobutter. Beim Mahlen wird es warm, die Kakaobutter schmilzt – deshalb wird alles dickflüssig. Diese Masse heißt Kakaomasse.',
+ setup(a,api){
+  a.innerHTML=`<div class="stage" id="ms"></div><div class="row" id="mrow"></div>`;
+  const st=a.querySelector('#ms'),row=a.querySelector('#mrow');let n=0;api.count('Schritt 1','von 3');
+  const shell=`<svg viewBox="-16 -11 32 22" width="52" height="36" style="overflow:visible"><g class="sh l"><path d="M0 -9A14 9 0 0 0 0 9Z" fill="#6b3a1e" stroke="#4a2a12"/></g><g class="sh r"><path d="M0 -9A14 9 0 0 1 0 9Z" fill="#6b3a1e" stroke="#4a2a12"/></g><g class="nib" style="opacity:0">${[[-5,-2],[2,-3],[-1,3],[5,2]].map(([x,y])=>`<path d="M${x-3} ${y}L${x} ${y-3}L${x+3} ${y}L${x} ${y+3}Z" fill="#3e220f"/>`).join('')}</g></svg>`;
+  const P=[[18,30],[38,28],[58,30],[78,28],[18,68],[38,70],[58,68],[78,70]];
+  const btns=P.map(([l,t])=>{const b=document.createElement('button');b.className='tapit';b.style.left=l+'%';b.style.top=t+'%';b.innerHTML=shell;b.setAttribute('aria-label','Kakaobohne knacken');
+   b.onclick=()=>{if(b.dataset.ok)return;b.dataset.ok=1;Sfx.play('crack');
+    b.querySelector('.sh.l').animate([{transform:'translate(0,0)'},{transform:'translate(-6px,3px) rotate(-25deg)'}],{duration:250,fill:'forwards'});
+    b.querySelector('.sh.r').animate([{transform:'translate(0,0)'},{transform:'translate(6px,3px) rotate(25deg)'}],{duration:250,fill:'forwards'});
+    b.querySelector('.nib').style.opacity=1;n++;api.hint(n<8?'Knack!':'Alle geknackt! Jetzt die Schalen wegpusten.',true);
+    if(n===8){row.innerHTML='<button class="btn" id="blow">💨 Schalen wegpusten</button>';row.querySelector('#blow').onclick=blow}};
+   st.appendChild(b);return b});
+  const blow=()=>{row.innerHTML='';Sfx.play('whoosh');btns.forEach((b,k)=>b.querySelectorAll('.sh').forEach(s=>s.animate([{opacity:1,transform:'translate(0,0)'},{opacity:0,transform:`translate(${120+k*8}px,-${60+k*6}px) rotate(200deg)`}],{duration:700,delay:k*60,fill:'forwards'})));
+   api.count('Schritt 2','von 3');api.hint('Die leichten Schalen fliegen weg – die schweren Kerne bleiben liegen.',true);
+   setTimeout(mill,1300)};
+  const mill=()=>{api.count('Schritt 3','von 3');
+   st.innerHTML=`<svg viewBox="0 0 400 250" width="100%" height="100%" style="position:absolute;inset:0"><rect x="70" y="40" width="150" height="130" rx="10" fill="#8a949a" stroke="#5f676c" stroke-width="4"/><g id="whl"><circle cx="145" cy="105" r="45" fill="none" stroke="#3e4549" stroke-width="8"/>${[0,60,120].map(a=>`<line x1="100" y1="105" x2="190" y2="105" stroke="#3e4549" stroke-width="6" transform="rotate(${a} 145 105)"/>`).join('')}</g><path d="M220 140L262 154V164L220 156Z" fill="#6f7c84"/><rect id="strm" x="256" y="164" width="7" height="0" fill="#3e220f"/>
+    <path d="M240 200H300L296 244Q270 248 244 244Z" fill="#c9d0d4" stroke="#7d868c" stroke-width="3"/><clipPath id="cupc"><path d="M240 200H300L296 244Q270 248 244 244Z"/></clipPath><rect id="lvl" x="236" y="246" width="70" height="0" fill="#3e220f" clip-path="url(#cupc)"/></svg>`;
+   // Rad mit dem Finger (oder der Maus) im Kreis drehen: 2 volle Umdrehungen = fertig
+   row.innerHTML='<p class="hint good" style="margin:0">👆 Dreh das Rad mit dem Finger im Kreis!</p>';
+   const svg=st.querySelector('svg'),w=st.querySelector('#whl'),strm=st.querySelector('#strm'),lvl=st.querySelector('#lvl');
+   w.insertAdjacentHTML('beforeend','<circle cx="145" cy="60" r="11" fill="#e8892b" stroke="#b0631a" stroke-width="3"/><circle cx="145" cy="60" r="4" fill="#fff"/>');
+   svg.insertAdjacentHTML('afterbegin','<circle id="whit" cx="145" cy="105" r="78" fill="transparent"/>');
+   st.style.touchAction='none';
+   let ang=0,acc=0,last=null,drag=false,idle=null,fin=false;const GOAL=720,grind=Sfx.drag('grind',260);
+   const center=()=>{const r=svg.getBoundingClientRect(),k=Math.min(r.width/400,r.height/250),ox=r.left+(r.width-400*k)/2,oy=r.top+(r.height-250*k)/2;return {x:ox+145*k,y:oy+105*k,k}};
+   const angleOf=e=>{const c=center();return Math.atan2(e.clientY-c.y,e.clientX-c.x)*180/Math.PI};
+   const render=()=>{w.setAttribute('transform',`rotate(${ang} 145 105)`);const p=Math.min(1,acc/GOAL),hh=Math.round(p*48);lvl.setAttribute('height',hh);lvl.setAttribute('y',246-hh)};
+   st.addEventListener('pointerdown',e=>{if(fin)return;const c=center();if(Math.hypot(e.clientX-c.x,e.clientY-c.y)>95*c.k)return;drag=true;last=angleOf(e);try{st.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+   st.addEventListener('pointermove',e=>{if(!drag||fin)return;const a2=angleOf(e);let d=a2-last;if(d>180)d-=360;if(d<-180)d+=360;last=a2;
+    ang+=d;acc+=Math.abs(d);grind.move(Math.abs(d));render();strm.setAttribute('height',36);clearTimeout(idle);idle=setTimeout(()=>strm.setAttribute('height',0),250);
+    const p=acc/GOAL;api.count(`${Math.min(100,Math.round(p*100))} %`,'gemahlen');
+    if(p>=1){fin=true;drag=false;grind.stop();strm.setAttribute('height',0);api.hint('Fertig: dickflüssige Kakaomasse!',true);row.innerHTML='';api.count('✓','');api.done()}
+    else api.hint(p<.5?'Weiter drehen – die Kerne werden zermahlen …':'Es wird dickflüssig …',true)});
+   ['pointerup','pointercancel','pointerleave'].forEach(ev=>st.addEventListener(ev,()=>{drag=false}));
+   render();api.count('0 %','gemahlen')};
+ }},
+{x:1960,name:'Mischen',title:'Zutaten mischen',
+ intro:'Kakaomasse allein schmeckt sehr bitter. Für Milchschokolade kommen noch Zucker, Milchpulver und extra Kakaobutter dazu. Alles wird im großen Mischer gut verrührt.',
+ task:'Gib nur die richtigen Zutaten für Milchschokolade in den Mischer.',
+ fact:'In Milchschokolade steckt meistens mehr Zucker als Kakao! Je mehr Kakao, desto dunkler und herber schmeckt die Schokolade.',
+ setup(a,api){
+  a.innerHTML=`<div class="stage" style="height:190px"><svg viewBox="0 0 400 190" width="100%" height="100%" style="position:absolute;inset:0"><path d="M90 50Q200 220 310 50Z" fill="#c9d0d4" stroke="#7d868c" stroke-width="5"/><ellipse id="mx" cx="200" cy="58" rx="104" ry="14" fill="#3e220f"/><text id="mxl" x="200" y="86" font-size="15" text-anchor="middle" font-weight="bold" fill="#3a2414">Kakaomasse</text></svg></div>
+   <div class="ingr">${[['Zucker','<svg viewBox="0 0 30 22" width="27" height="20" aria-hidden="true"><g stroke="#8d99a3" stroke-width="1" stroke-linejoin="round"><path d="M2 12l6-3 6 3v6l-6 3-6-3z" fill="#fff"/><path d="M2 12l6 3 6-3M8 15v6" fill="none"/><path d="M15 12l6-3 7 3v6l-7 3-6-3z" fill="#eef2f5"/><path d="M15 12l6 3 7-3M21 15v6" fill="none"/><path d="M9 4l6-3 6 3v6l-6 3-6-3z" fill="#fff"/><path d="M9 4l6 3 6-3M15 7v6" fill="none"/></g></svg>',1],['Salz','🧂',0],['Milchpulver','🥛',1],['Ketchup','🍅',0],['Kakaobutter','🧈',1],['Mehl','🌾',0]].map(([n,e,ok])=>`<button class="ing" data-ok="${ok}" data-n="${n}">${e} ${n}</button>`).join('')}</div>`;
+  let n=0;const cols=['#3e220f','#55301a','#6b3d20','#7f4a26'],mx=a.querySelector('#mx'),lbl=a.querySelector('#mxl');
+  a.querySelectorAll('.ing').forEach(b=>b.onclick=()=>{if(b.classList.contains('used'))return;
+   if(b.dataset.ok!=='1'){b.classList.remove('no');void b.offsetWidth;b.classList.add('no');api.hint(`${b.dataset.n} gehört nicht in Milchschokolade!`);return}
+   b.classList.add('used');Sfx.play('plop');n++;mx.setAttribute('fill',cols[n]);lbl.textContent=n<3?`Kakaomasse + ${n} Zutat${n>1?'en':''}`:'Schokoladenmasse';
+   api.count(n,3);api.hint(n<3?`${b.dataset.n} – richtig!`:'Alles drin – jetzt wird gemischt!',true);if(n===3)api.done()});
+  api.count(0,3);
+ }},
+{x:2400,name:'Conchieren',title:'Rühren in der Conche',
+ intro:'Die Schokoladenmasse ist noch ein bisschen körnig. In einer Maschine, die „Conche“ heißt, wird sie stundenlang gerührt und gewalzt. So wird sie ganz glatt und zartschmelzend.',
+ task:'Schieb die Walze hin und her, bis die Schokolade ganz glatt ist.',
+ fact:'Manche Schokolade wird mehrere Tage lang gerührt! Die Conche hat der Schweizer Rodolphe Lindt im Jahr 1879 erfunden.',
+ setup(a,api){
+  a.innerHTML=`<div class="stage" style="height:200px"><svg viewBox="0 0 400 200" width="100%" height="100%" style="position:absolute;inset:0"><path d="M38 78Q42 156 78 160H322Q358 156 362 78Z" fill="#7d7f7a"/>
+   <path d="M40 112H360Q356 156 322 160H78Q44 156 40 112Z" fill="#6a3a1c"/><g id="grain">${Array.from({length:70},(_,k)=>`<circle cx="${60+(k*53)%280}" cy="${118+(k*29)%34}" r="2.6" fill="#8a5532"/>`).join('')}</g><path id="glz" d="M70 122H240" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity="0"/>
+   <clipPath id="rolc"><rect x="0" y="0" width="392" height="200"/></clipPath><g clip-path="url(#rolc)"><g id="rol"><line x1="80" y1="56" x2="80" y2="130" stroke="#5f676c" stroke-width="6"/><line x1="80" y1="56" x2="430" y2="56" stroke="#5f676c" stroke-width="6"/><g id="rstone"><circle cx="80" cy="130" r="28" fill="#8d8f8c" stroke="#5f615c" stroke-width="3"/><path d="M53 130H107M80 103V157" stroke="#70726d" stroke-width="3"/><circle cx="70" cy="120" r="2" fill="#c9cac6"/><circle cx="92" cy="140" r="2" fill="#c9cac6"/><circle cx="90" cy="118" r="1.6" fill="#5f615c"/><circle cx="80" cy="130" r="6" fill="#3e4549"/></g></g></g>
+   <path d="M14 78Q16 176 72 180H328Q384 176 386 78H362Q358 156 322 160H78Q42 156 38 78Z" fill="#a9aaa6" stroke="#73756f" stroke-width="3"/>${[[24,110],[48,168],[110,172],[190,171],[270,172],[350,166],[376,110]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.8" fill="#6f716c"/>`).join('')}
+   <rect x="366" y="42" width="34" height="28" rx="4" fill="#5f676c"/><g id="fly"><circle cx="376" cy="26" r="21" fill="none" stroke="#3e4549" stroke-width="5"/>${[0,60,120].map(a=>`<line x1="355" y1="26" x2="397" y2="26" stroke="#3e4549" stroke-width="3.5" transform="rotate(${a} 376 26)"/>`).join('')}<circle cx="376" cy="26" r="5" fill="#3e4549"/></g>
+   <circle cx="40" cy="38" r="26" fill="#fff" stroke="#3e4549" stroke-width="3"/><line id="hnd" x1="40" y1="38" x2="40" y2="20" stroke="#c0453a" stroke-width="4" stroke-linecap="round"/><text id="hrs" x="40" y="80" font-size="0"></text></svg></div>
+   <div class="bar"><div class="bf" id="sm"></div><span id="smt">glatt: 0 %</span></div><p class="hint good" style="margin-top:8px">👆 Schieb die Walze im Trog hin und her!</p>`;
+  // Walze folgt dem Finger: hin und her schieben walzt die Schokolade glatt
+  let p=0,x=0,last=null,drag=false,fin=false;const roll=Sfx.drag('conche',420),GOAL=1150; // ca. 2–3x ganz hin und her
+  const st=a.querySelector('.stage'),svg=st.querySelector('svg'),rol=a.querySelector('#rol'),gr=a.querySelector('#grain'),hnd=a.querySelector('#hnd'),sm=a.querySelector('#sm'),smt=a.querySelector('#smt');
+  st.style.touchAction='none';st.style.cursor='grab';hnd.style.transformOrigin='40px 38px';
+  const toSvgX=e=>{const r=svg.getBoundingClientRect(),k=Math.min(r.width/400,r.height/200),ox=r.left+(r.width-400*k)/2;return (e.clientX-ox)/k};
+  const render=()=>{rol.setAttribute('transform',`translate(${x} 0)`);a.querySelector('#rstone').setAttribute('transform',`rotate(${x*2.05} 80 130)`);a.querySelector('#fly').setAttribute('transform',`rotate(${x*3} 376 26)`);gr.setAttribute('opacity',1-p/100);a.querySelector('#glz').setAttribute('opacity',p/100*.6);hnd.style.transform=`rotate(${p*10.8}deg)`;
+   const hh=Math.round(p/100*72);sm.style.width=p+'%';smt.textContent=`glatt: ${Math.round(p)} % · ${hh} Stunden gerührt`};
+  st.addEventListener('pointerdown',e=>{if(fin)return;drag=true;last=toSvgX(e);try{st.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()});
+  st.addEventListener('pointermove',e=>{if(!drag||fin)return;const sx=toSvgX(e),nx=Math.max(0,Math.min(225,sx-80)),d=Math.abs(nx-x);x=nx;last=sx;roll.move(d);
+   p=Math.min(100,p+d/GOAL*100);render();
+   if(p>=100){fin=true;drag=false;roll.stop();api.hint('Ganz glatt und glänzend!',true);api.count('✓','');api.done()}else api.hint(p<50?'Weiter schieben – noch körnig.':'Schon viel glatter!',true)});
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>st.addEventListener(ev,()=>{drag=false}));
+  render();
+  api.count('🌀','');
+ }},
+{x:2840,name:'Formen & Packen',title:'In Formen gießen, kühlen und verpacken',
+ intro:'Jetzt kommt die flüssige Schokolade in Formen – als Tafel, als Weihnachtsmann oder als Schokobonbon. Im Kühltunnel wird sie fest und kann aus der Form geklopft werden. Zum Schluss wird alles in Papier und bunte Folie gewickelt und in Kartons verpackt.',
+ task:'Füll die Formen, kühl sie, klopf die Schokolade heraus und pack sie ein.',
+ fact:'Die bunte Folie schützt die Schokolade vor Licht, Luft und fremden Gerüchen. Hohle Schoko-Weihnachtsmänner entstehen übrigens so: Die Form wird beim Kühlen gedreht, dann bleibt die Schokolade nur innen an der Wand hängen.',
+ setup(a,api){
+  const MOLD=k=>{const tf=`translate(30 42) scale(${MOLDSC[MOLDT[k]]})`;return `<svg viewBox="0 0 60 80" width="70" height="94"><rect x="2" y="2" width="56" height="76" rx="6" fill="#e6ecef" stroke="#9aa3a8" stroke-width="2"/><clipPath id="tm${k}"><path transform="${tf}" d="${SIL[MOLDT[k]]}"/></clipPath><path transform="${tf}" d="${SIL[MOLDT[k]]}" fill="#c9d0d4" stroke="#9aa3a8" stroke-width=".8"/><g transform="${tf}" fill="none" stroke="#aeb6bb" stroke-width=".6" stroke-linecap="round">${DET[MOLDT[k]]}</g><rect class="fl" x="0" y="80" width="60" height="0" fill="#5a2e14" clip-path="url(#tm${k})"/><g class="flc" transform="${tf}" fill="none" stroke="#2a1205" stroke-width=".7" stroke-linecap="round" opacity="0">${DET[MOLDT[k]]}</g></svg>`};
+  a.innerHTML=`<div class="stage" style="height:200px"><div class="snow"></div></div><div class="row" id="frow"></div>`;
+  const st=a.querySelector('.stage'),row=a.querySelector('#frow');let phase=0,n=0;const figs=[];api.count('Schritt 1','von 4');
+  const ms=[0,1,2,3].map(k=>{const b=document.createElement('button');b.className='tapit';b.style.left=(20+k*20)+'%';b.style.top='50%';b.innerHTML=MOLD(k);b.setAttribute('aria-label','Form');
+   b.onclick=()=>{if(phase===0&&!b.dataset.f){b.dataset.f=1;Sfx.play('fill');const f=b.querySelector('.fl');f.animate([{height:'0px',y:'80px'},{height:'80px',y:'0px'}],{duration:500,fill:'forwards'});const fc=b.querySelector('.flc');fc.setAttribute('opacity',.9);fc.animate([{opacity:0},{opacity:0,offset:.4},{opacity:.9}],{duration:600});f.setAttribute('height',80);f.setAttribute('y',0);
+     n++;api.hint(n<4?'Gluck, gluck …':'Alle Formen voll!',true);if(n===4){phase=1;api.count('Schritt 2','von 4');row.innerHTML='<button class="btn" id="cool">❄️ In den Kühltunnel</button>';row.querySelector('#cool').onclick=cool}}
+    else if(phase===2&&!b.dataset.o){b.dataset.o=1;Sfx.play('knock');const fl=b.querySelector('.fl'),fc=b.querySelector('.flc');fl.getAnimations().forEach(x=>x.cancel());fc.getAnimations().forEach(x=>x.cancel());fl.setAttribute('height',0);fl.setAttribute('y',80);fc.setAttribute('opacity',0);b.style.opacity=.6;
+     const fig=document.createElement('button');fig.className='tapit';fig.setAttribute('aria-label','Schokolade einpacken');fig.style.cssText=`left:${20+k*20}%;top:50%`;fig.innerHTML=`<svg viewBox="-13 -16 26 29" width="62" height="70">${choc(MOLDT[k],0,0,1,'#5a2e14')}</svg>`;st.appendChild(fig);figs.push(fig);
+     fig.onclick=()=>{if(phase!==3||fig.dataset.w)return;fig.dataset.w=1;Sfx.play('foil');fig.querySelector('svg').innerHTML=wrapped(MOLDT[k],0,0,1);fig.animate([{transform:'translate(-50%,-75%) scale(1)'},{transform:'translate(-50%,-75%) scale(1.15) rotate(8deg)'},{transform:'translate(-50%,-75%) scale(1)'}],{duration:300});
+      n++;api.hint(n<4?['Tafel eingepackt!','Weihnachtsmann eingewickelt!','Bonbon eingedreht!','Weihnachtsmann eingewickelt!'][k]:'Alle eingepackt – ab in den Karton!',true);if(n===4){row.innerHTML='<button class="btn" id="box">📦 In den Karton</button>';row.querySelector('#box').onclick=boxUp}};
+     fig.animate([{transform:'translate(-50%,-50%)'},{transform:'translate(-50%,-90%)'},{transform:'translate(-50%,-75%)'}],{duration:400,fill:'forwards'});
+     n++;api.hint(n<4?'Klopf, klopf!':'Jetzt einpacken: Tippe auf jede Schokolade!',true);if(n===4){phase=3;n=0;api.count('Schritt 4','von 4');ms.forEach(m=>m.style.visibility='hidden')}}};
+   st.appendChild(b);return b});
+  const boxUp=()=>{row.innerHTML='';const bx=document.createElement('div');bx.style.cssText='position:absolute;left:50%;bottom:6px;transform:translateX(-50%);line-height:0';bx.innerHTML=`<svg viewBox="0 12 50 48" width="120" height="115" style="overflow:visible">${carton(0)}</svg>`;st.appendChild(bx);
+   figs.forEach((f,k)=>setTimeout(()=>{f.animate([{left:f.style.left,top:'50%',opacity:1},{left:'50%',top:'78%',opacity:0}],{duration:450,fill:'forwards'});setTimeout(()=>{Sfx.play('thud',.8);bx.innerHTML=`<svg viewBox="0 12 50 48" width="120" height="115" style="overflow:visible">${carton(Math.min(5,k+1+(k===3?1:0)))}</svg>`},430)},k*220));
+   setTimeout(()=>{api.hint('Fertig verpackt – bereit für den Laden!',true);api.count('✓','');api.done()},4*220+500)};
+  const FLAKE=sz=>`<svg viewBox="-12 -12 24 24" width="${sz}" height="${sz}">${[0,60,120].map(a=>`<g transform="rotate(${a})" stroke="#fff" stroke-width="1.4" stroke-linecap="round"><path d="M0 -11V11M-3 -8L0 -5L3 -8M-3 8L0 5L3 8"/></g>`).join('')}</svg>`;
+  const cool=()=>{row.innerHTML='';Sfx.loop('cool',2200);const sn=st.querySelector('.snow');sn.classList.add('on');for(let k=0;k<26;k++){const c=document.createElement('div');c.className='crystal';const z=16+(k*37)%30;c.style.cssText=`left:${(k*41+6)%94}%;top:${(k*29+4)%88}%;animation-delay:${(k*67)%420}ms`;c.innerHTML=FLAKE(z);sn.appendChild(c)}api.hint('Brrr … die Schokolade wird fest.',true);
+   setTimeout(()=>{sn.innerHTML='';sn.classList.remove('on');phase=2;n=0;api.count('Schritt 3','von 4');api.hint('Jetzt tippe auf die Formen zum Ausklopfen.',true)},2400)};
+ }}
+];
+
+/* ---------- Welt bauen ---------- */
+function build(){
+ const r=rng(7);
+ // Hallenwand mit Fenstern, Rohren und Lampen (Parallax-Ebene)
+ let far=`<svg width="4000" height="500" style="position:absolute;left:0;top:0"><rect x="0" y="250" width="4000" height="160" fill="#d6cbb8"/>${Array.from({length:50},(_,k)=>`<rect x="${k*80+10}" y="60" width="56" height="120" rx="4" fill="#cfe4ef" stroke="#a9b2b7" stroke-width="4"/><line x1="${k*80+38}" y1="60" x2="${k*80+38}" y2="180" stroke="#a9b2b7" stroke-width="3"/><line x1="${k*80+10}" y1="120" x2="${k*80+66}" y2="120" stroke="#a9b2b7" stroke-width="3"/>`).filter((_,k)=>k%2===0).join('')}
+  <rect x="0" y="206" width="4000" height="10" fill="#b0b8bd"/><rect x="0" y="226" width="4000" height="6" fill="#c46a3a"/>${Array.from({length:25},(_,k)=>`<line x1="${k*160+80}" y1="0" x2="${k*160+80}" y2="30" stroke="#7d868c" stroke-width="2"/><path d="M${k*160+66} 30H${k*160+94}L${k*160+88} 42H${k*160+72}Z" fill="#5f676c"/><ellipse cx="${k*160+80}" cy="44" rx="7" ry="3" fill="#fff6c8"/>`).join('')}</svg>`;
+ $('#far').innerHTML=far;
+ let w=`<div class="ground"></div><div class="path"></div>`;
+ for(let x=60;x<3160;x+=110+r()*90){if(STATIONS.some(st=>Math.abs(st.x-x)<190)||Math.abs(END_X-x)<160||Math.abs(HX-x)<90||x<200)continue;
+  const t=r();w+=`<div class="deco" style="left:${x}px;transform:translateX(-50%)">${t<.45?decoPallet(r):t<.8?decoShelf():decoExt()}</div>`}
+ STATIONS.forEach((st,i)=>{w+=`<div class="station" id="st${i}" style="left:${st.x}px"><div class="sign"><div class="board"><b>${i+1}</b>${st.name}</div><div class="post"></div></div>${PROPS[i]}</div>`});
+ w+=`<div class="station" id="stEnd" style="left:${END_X}px"><div class="sign"><div class="board"><b>🚚</b>Laderampe</div><div class="post"></div></div></div>`;
+ w+=`<div class="dock" id="truck" style="left:3250px;z-index:2"><svg width="150" height="110" viewBox="0 0 150 110" style="overflow:visible"><rect x="0" y="16" width="100" height="70" rx="4" fill="#5a83c4"/><text x="56" y="57" font-size="13" text-anchor="middle" fill="#fff" font-weight="bold" font-family="Trebuchet MS,sans-serif">🍫 Schoko</text><rect x="2" y="22" width="20" height="60" rx="2" fill="#24365a"/><g class="cargo" opacity="0"><g transform="translate(-2 40) scale(.5)">${carton(5)}</g></g><rect class="door" x="2" y="22" width="20" height="60" rx="2" fill="#4a72b0" stroke="#3a5f99" stroke-width="1.5" opacity="1"/><rect x="16" y="48" width="3" height="10" rx="1.5" fill="#d9dee1"/><rect x="100" y="38" width="42" height="48" rx="6" fill="#2f4a7a"/><rect x="110" y="46" width="24" height="16" rx="3" fill="#bfe6f7"/><g class="whl"><circle cx="26" cy="94" r="14" fill="#333"/><path d="M26 82V106M14 94H38" stroke="#777" stroke-width="2.5"/></g><g class="whl"><circle cx="118" cy="94" r="14" fill="#333"/><path d="M118 82V106M106 94H130" stroke="#777" stroke-width="2.5"/></g><rect x="-6" y="80" width="8" height="4" rx="2" fill="#5f676c"/></svg></div>`;
+ w+=`<div id="ground"></div>`;w+=`<div id="player"><div id="pflip"><div id="carry"></div>${PLAYER}</div></div>`;
+ $('#world').innerHTML=w;
+ $('#progress').innerHTML=STATIONS.map((_,i)=>`<div class="slot" id="slot${i}">${i+1}</div>`).join('');
+ updateMarkers();
+}
+function updateMarkers(){renderGround();refreshTeacherBtn();
+ STATIONS.forEach((_,i)=>{const e=$('#st'+i);e.classList.toggle('done',i<done);e.classList.toggle('next',i==done);$('#slot'+i).classList.toggle('done',i<done);$('#slot'+i).textContent=i<done?'✓':i+1});
+ $('#stEnd').classList.toggle('next',done>=6);
+ const want=done<6?done:6;
+ const need=!dressed?' – zieh am Eingang Kittel und Haube an':(load===want?'':dropped&&dropped.idx===want?` – nimm ${CARRY[want].short} mit`:` – du brauchst ${CARRY[want].short}`);
+ const have=[dressed?'🥼 Kittel und Haube an':'',load!==null?`Du trägst ${CARRY[load].name}`:''].filter(Boolean).join(' · ');
+ $('#tip').innerHTML=`<span class="go">${done<6?`👉 Lauf zu Station ${done+1}: ${STATIONS[done].name}${need}`:delivered?'🎉 Die Schokolade ist unterwegs in die Läden!':`🚚 Lauf zur Laderampe!${need}`}</span>`+(have?`<span class="have">${have}</span>`:'');placeTip();
+}
+
+/* ---------- Spielschleife ---------- */
+function placeTip(){const r=$('#hud').getBoundingClientRect();let b=0;for(const c of $('#hud').children)b=Math.max(b,c.getBoundingClientRect().bottom);$('#tip').style.top=(Math.max(b,r.top)+6)+'px';const g=$('#guide');if(g)g.style.top=($('#tip').getBoundingClientRect().bottom+6)+'px'}
+function layout(){placeTip();s=Math.min(innerHeight/H,innerWidth/560);const free=innerHeight-H*s;
+ // Hochformat: Halle etwas anheben, darunter Betonboden
+ const soil=innerHeight>innerWidth?Math.round(free*.45):0;offY=free-soil;
+ const el=$('#soil');el.style.top=(offY+H*s-2)+'px';el.style.display=soil?'block':'none'}
+let last=0,nearCur='x';
+function zone(i,cx,extra=0){const w=$(i).offsetWidth/2;return [cx-w-30,cx+w+10+extra]} // ab dem linken Rand des Schildes bis zum Ende der Maschine
+function nearStation(){let near=null;STATIONS.forEach((st,i)=>{const [a,b]=zone('#st'+i,st.x);if(px>=a&&px<=b)near=i});const [a,b]=zone('#stEnd',END_X,60);if(px>=a&&px<=b)near='end';return near}
+function loop(t){
+ const dt=Math.min(.05,(t-last)/1000||0);last=t;
+ let v=0;
+ if(!modalOpen){if(!scene&&keys.left)v=-1;else if(!scene&&keys.right)v=1;else if(target!==null){if(Math.abs(target-px)>8)v=Math.sign(target-px);else target=null}}
+ px=Math.max(60,Math.min(3230,px+v*270*dt));if(v)dir=v;
+ const pl=$('#player');pl.style.left=px+'px';pl.classList.toggle('walk',!!v);$('#pflip').style.transform=`scaleX(${dir})`;
+ const viewW=innerWidth/s;cam=viewW>=W?0:Math.max(0,Math.min(W-viewW,px-viewW/2));
+ $('#world').style.transform=`translate(${-cam*s}px,${offY}px) scale(${s})`;
+ $('#far').style.transform=`translate(${-cam*.4*s}px,${offY}px) scale(${s})`;
+ const near=nearStation();
+ if(!modalOpen&&!scene)autoPickup();
+ const key=(modalOpen||scene)?'m':[near,done,dressed,load,delivered,lineBlock()].join('|');
+ if(key!==nearCur){nearCur=key;const ab=$('#action');
+  if(modalOpen||scene||near===null){ab.style.display='none'}
+  else{ab.style.display='block';
+   if(near==='end'){const lk=!delivered&&(done<6||load!==6);ab.classList.toggle('locked',lk);ab.textContent=delivered?'🏁 Rückblick und Quiz':done<6?'🔒 Erst alle Stationen schaffen':(load!==6?'🔒 Du brauchst den Karton mit Schokolade':'🚚 Schokolade einladen!')}
+   else{const miss=near===done&&!hasReq(near),lk=near>done||miss;ab.classList.toggle('locked',lk);ab.textContent=near>done?`🔒 Erst Station ${done+1} schaffen`:miss?`🔒 Du brauchst ${needText(near)}`:(near<done?`↺ Station ${near+1} nochmal`:`▶ Station ${near+1} starten`)}
+   if(lineBlock()&&!ab.classList.contains('locked')){ab.classList.add('locked');ab.textContent='👂 Meister Lenz spricht noch …'}}}
+ requestAnimationFrame(loop);
+}
+function act(){
+ if(modalOpen||scene||lineBlock())return;clearLines();stopSpeech();const near=nearStation();
+ if(near==='end'){if(delivered)openEnd();else if(done>=6&&load===6)deliver()}else if(near!==null&&(near<done||(near===done&&hasReq(near))))openStation(near);
+}
+
+/* ---------- Modal ---------- */
+function showModal(html){stopSpeech();clearTimeout(guideTm);hideGuide();if(sayNow){sayQ.unshift(sayNow);sayNow=null}modalOpen=true;keys.left=keys.right=false;target=null;const m=$('#modal');m.innerHTML=`<div class="card">${html}</div>`;m.classList.add('open');m.querySelector('.card').scrollTop=0}
+function hideModal(){stopSpeech();Sfx.stopLoops();$('#modal').classList.remove('open');$('#modal').innerHTML='';modalOpen=false;setTimeout(resumeLines,0)}
+function openStation(i){
+ const S=STATIONS[i];let cleanup=null,finished=false,pendingFact=null;const introKey='i'+i,factKey='f'+i;
+ showModal(`<div class="head"><span class="num">${i+1}</span><h2>${S.title}</h2><button class="iconbtn" id="spk" aria-label="Vorlesen">🔊</button><button class="iconbtn" id="cls" aria-label="Schließen">✕</button></div>
+  <div class="mintro">${MEISTER}<p class="intro">${S.intro}</p></div><div class="taskline"><span>👉 ${S.task}</span><span id="cnt"></span></div><div id="waitnote" class="waitnote" hidden><span id="wtxt"></span><button class="skipbtn" id="wskip" data-skip="i${i}" hidden>Überspringen ⏭</button></div><div class="skiprow"><button class="skipbtn" id="tskip" data-skip="teacher" hidden>Station überspringen ⏭</button></div><div id="area"></div><p class="hint" id="hint"></p><div id="after"></div>`);
+ const unlock=()=>{const a=$('#area'),w=$('#waitnote'),f=$('#fin');if(a)a.classList.remove('wait');if(w)w.hidden=true;if(f&&pendingFact){pendingFact=null;f.disabled=false;f.textContent='Station geschafft! ✓';const fs=$('#fskip');if(fs)fs.remove()}};
+ const readAloud=()=>{const isFact=!!pendingFact;speak(isFact?pendingFact:S.intro+' '+S.task,()=>{heard.add(isFact?factKey:introKey);unlock()})};
+ const api={count:(n,m)=>{$('#cnt').textContent=m===''?n:`${n} ${typeof n==='number'?'/':''} ${m}`},
+  hint:(t,good)=>{const h=$('#hint');if(!h)return;h.textContent=t;h.className='hint'+(good?' good':'')},
+  done:()=>{if(finished)return;finished=true;if(cleanup)cleanup();
+   setTimeout(()=>{const af=$('#after');if(!af)return;af.innerHTML=`<div class="fact"><b>💡 Wusstest du?</b><br>${S.fact}</div><button class="btn big" id="fin">Station geschafft! ✓</button><div class="skiprow"><button class="skipbtn" id="fskip" data-skip="f${i}" hidden>Überspringen ⏭</button></div>`;
+    const fin=$('#fin');fin.onclick=()=>{hideModal();complete(i)};fin.scrollIntoView({behavior:'smooth',block:'end'});pendingFact='Wusstest du? '+S.fact;fin.disabled=true;fin.textContent=WAIT_TXT();refreshSkips();$('#fskip').onclick=()=>{stopSpeech();unlock()};readAloud()},600)}};
+ $('#cls').onclick=()=>{if(cleanup&&!finished)cleanup();hideModal()};
+ $('#spk').onclick=readAloud;
+ $('#wskip').onclick=()=>{stopSpeech();unlock()};
+ $('#tskip').onclick=()=>{if(cleanup&&!finished)cleanup();finished=true;if(i===done)skipStation();else{hideModal();nearCur='x'}};
+ cleanup=S.setup($('#area'),api)||null;
+ $('#area').classList.add('wait');$('#wtxt').textContent=WAIT_TXT();$('#waitnote').hidden=false;refreshSkips();readAloud();
+}
+function complete(i){
+ if(i!==done){playScene(i,()=>{updateCarry();updateMarkers();nearCur='x'},{pour:false});return}
+ playScene(i,()=>{load=i+1;loadOrigin=px;done++;renderGround();confetti(40);updateMarkers();setTimeout(()=>updateCarry(true),150);nearCur='x';say(NEXT_LINE[i])},{keepCarry:true,pour:true,extra:SCENES[i].extra})}
+function confetti(n){const cols=['#e8892b','#f2c230','#4a9a3c','#c9502a','#6b3a1e','#5a83c4'];for(let i=0;i<n;i++){const c=document.createElement('div');c.className='confetti';c.style.left=Math.random()*100+'vw';c.style.background=cols[i%cols.length];c.style.animationDuration=(2+Math.random()*2)+'s';c.style.animationDelay=Math.random()*.5+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),4600)}}
+
+/* ---------- Szenen: die Figur bedient die Maschine ---------- */
+let scene=null,climbAnim=null,playerLift=0;
+function setAct(a){const p=$('#player');p.classList.remove('act-point','act-scoop','act-reach','act-crank','act-lift');if(a)p.classList.add('act-'+a)}
+function setTool(t){document.querySelectorAll('#player .tool').forEach(g=>g.style.display=(t&&g.classList.contains('t-'+t))?'':'none')}
+const CLUMP=c=>`<svg width="18" height="11"><ellipse cx="9" cy="5.5" rx="8" ry="4.5" fill="${c}"/><circle cx="6" cy="5" r="1.8" fill="rgba(0,0,0,.25)"/><circle cx="12" cy="6" r="1.8" fill="rgba(0,0,0,.25)"/></svg>`;
+const DROP=c=>`<svg width="12" height="14"><path d="M6 0Q12 8 6 14Q0 8 6 0Z" fill="${c}"/></svg>`;
+const PUFF='<svg width="18" height="18"><circle cx="9" cy="9" r="8" fill="#fff"/></svg>';
+// Jede Szene: (beim ersten Mal) Getragenes in die Maschine schütten → Maschine arbeitet → neues Zwischenprodukt befüllen → mitnehmen
+const SCENES=[
+ {cap:'Die Bohnen laufen über das Rüttelband. Steine und Blätter fallen heraus.',dur:4300,extra:4600,lift:true,stand:16,climb:31,climbUp:450,climbDown:400,in:[67,108],col:'#7a4424',out:239,
+  run(c){const {at,put,anim,panim,prop,P,T,prod}=c;
+   at(T,()=>{c.setAct('point');Sfx.loop('belt',4000);panim(prop.querySelector('.p-dash'),[{strokeDashoffset:0},{strokeDashoffset:-48}],400,0,10);
+    put('<div class="sclabel">Steine und Blätter raus!</div>',100,128,120,24,'opacity:0').animate([{opacity:0},{opacity:1}],{duration:300,delay:500,fill:'forwards'});
+    let beans=0;for(let k=0;k<12;k++)at(k*190,()=>{const bad=[3,7,10].includes(k);const d=put(bad?`<svg width="14" height="12"><path d="M1 8L4 1L11 0L13 7L7 11Z" fill="${k===7?'#6fae3e':'#8c8f92'}"/></svg>`:CLUMP('#7a4424'),66,60,bad?14:18,bad?12:11);
+     if(bad){at(740,()=>Sfx.play('stone',.8));anim(d,[{transform:'translate(0,0)'},{transform:'translate(64px,0)',offset:.5},{transform:'translate(68px,30px)',opacity:1,offset:.85},{transform:'translate(68px,30px)',opacity:0}],900)}
+     else{anim(d,[{transform:'translate(0,0)'},{transform:'translate(138px,0)',offset:.68},{transform:`translate(${(138+P.out-75)/2}px,2px)`,offset:.78},{transform:`translate(${P.out-66-9}px,24px)`,opacity:1,offset:.93},{transform:`translate(${P.out-66-9}px,26px)`,opacity:0}],1500);
+      at(1450,()=>{beans++;Sfx.play('beans',.6);prod.set(crate(Math.min(9,beans)))})}})});
+  }},
+ {cap:'In der heißen Trommel werden die Bohnen geröstet. Es duftet nach Schokolade!',dur:4500,extra:6100,stand:13,climb:109,in:[65,152],col:'#7a4424',out:229,
+  run(c){const {at,put,anim,panim,prop,P,T,prod}=c;
+   at(T,()=>{c.setAct('point');Sfx.loop('roast',4300);prop.querySelectorAll('.p-dash').forEach((l,k)=>panim(l,[{strokeDashoffset:0},{strokeDashoffset:k%2?36:-36}],500,0,8));
+    prop.querySelectorAll('.p-flame').forEach((f,k)=>panim(f,[{transform:'scaleY(.7)'},{transform:'scaleY(1.15)'},{transform:'scaleY(.8)'}],380+k*40,0,10));
+    put('<div class="sclabel">🔥 ca. 130 °C</div>',84,166,90,24,'opacity:0').animate([{opacity:0},{opacity:1}],{duration:300,delay:300,fill:'forwards'});
+    for(let k=0;k<6;k++)at(200+k*380,()=>{const pf=put(PUFF,94+(k*23)%60,150,18,18,'opacity:.7');anim(pf,[{opacity:.7,transform:'translateY(0) scale(1)'},{opacity:0,transform:'translateY(-60px) scale(2)'}],1300)});
+    at(2500,()=>{Sfx.play('clack');panim(prop.querySelector('.p-door'),[{fill:'#5f676c'},{fill:'#2b1a0e'}],200)});
+    let n=0;for(let k=0;k<6;k++)at(2600+k*220,()=>{const d=put(CLUMP('#4a2a12'),174-9,80,18,11);const dx=P.out-174,dy=80-34;
+     anim(d,[{transform:'translate(0,0)'},{transform:`translate(${dx*.5}px,${-14}px)`},{transform:`translate(${dx}px,${dy}px)`,opacity:1,offset:.88},{transform:`translate(${dx}px,${dy}px)`,opacity:0}],520);
+     at(500,()=>{n++;Sfx.play('beanMetal',.8);prod.set(tray(Math.min(9,Math.round(n*1.5))))})})});
+  }},
+ {cap:'Der Brecher knackt die Bohnen, das Gebläse pustet die Schalen weg, die Mühle macht Kakaomasse.',dur:4600,extra:6000,stand:13,climb:109,in:[63,150],col:'#4a2a12',out:133,
+  run(c){const {at,put,anim,panim,prop,P,T,prod}=c;
+   at(T,()=>{c.setAct('point');Sfx.loop('crush',1920);Sfx.loop('fan',3000);panim(prop.querySelector('.p-crusher'),[{transform:'translateX(0)'},{transform:'translateX(-2px)'},{transform:'translateX(2px)'},{transform:'translateX(0)'}],160,0,12);
+    panim(prop.querySelector('.p-fan'),[{transform:'rotate(0deg)'},{transform:'rotate(360deg)'}],300,0,10);
+    for(let k=0;k<9;k++)at(120+k*170,()=>{const f=put('<svg width="10" height="6"><path d="M0 3Q5 -2 10 3Q5 6 0 3Z" fill="#a37445"/></svg>',96,112,10,6);anim(f,[{transform:'translate(0,0)',opacity:1},{transform:`translate(${45+k*3}px,${6-k}px) rotate(160deg)`,opacity:1,offset:.7},{transform:`translate(${70}px,${10}px) rotate(300deg)`,opacity:0}],700)});
+    at(1400,()=>{Sfx.loop('grind',2600);panim(prop.querySelector('.p-wheel'),[{transform:'rotate(0deg)'},{transform:'rotate(720deg)'}],2600)});
+    const stream=put('<div style="width:5px;height:100%;background:#3e220f;border-radius:3px"></div>',P.out-14,30,5,0);
+    at(1700,()=>{Sfx.loop('stream',2300);anim(stream,[{height:'0px'},{height:'12px'}],200)});
+    for(let k=1;k<=5;k++)at(1800+k*420,()=>prod.set(jug(k/5,'#3e220f')));
+    at(4000,()=>anim(stream,[{height:'12px'},{height:'0px'}],150))});
+  }},
+ {cap:'Kakaomasse, Zucker, Milchpulver und Kakaobutter werden gemischt.',dur:4600,extra:4400,lift:true,stand:56,climb:31,climbUp:450,climbDown:400,in:[130,94],col:'#3e220f',out:130,
+  run(c){const {at,put,anim,panim,prop,P,T,prod}=c;const mix=prop.querySelector('.p-mix');
+   if(!c.opts.pour)panim(mix,[{opacity:1},{opacity:1}],1);
+   c.onLand=()=>panim(mix,[{opacity:0},{opacity:1}],300);
+   at(T,()=>{c.setAct('point');panim(mix,[{opacity:1},{opacity:1}],1);
+    put('<div class="sclabel">+ Zucker + Milchpulver + Kakaobutter</div>',60,128,190,24,'opacity:0').animate([{opacity:0},{opacity:1}],{duration:300,delay:200,fill:'forwards'});
+    [['#ffffff',246,100],['#f3ead6',246,48],['#ffffff',246,100],['#f3ead6',246,48],['#f2df8a',292,48]].forEach(([col,sx,sy],k)=>at(200+k*240,()=>{const d=put(CLUMP(col),sx-9,sy,18,11),dx=130-sx,dy=sy-94;
+     anim(d,[{transform:'translate(0,0)'},{transform:`translate(${dx*.5}px,${dy*.5-30}px)`},{transform:`translate(${dx}px,${dy}px)`,opacity:1,offset:.88},{transform:`translate(${dx}px,${dy}px)`,opacity:0}],560);at(490,()=>Sfx.play('plop',.85))}));
+    at(1500,()=>{Sfx.loop('mix',2000);panim(prop.querySelector('.p-paddle'),[{transform:'scaleX(1)'},{transform:'scaleX(-1)'},{transform:'scaleX(1)'}],500,0,4);panim(mix,[{fill:'#3e220f'},{fill:'#7f4a26'}],1800)});
+    const stream=put('<div style="width:6px;height:100%;background:#7f4a26;border-radius:3px"></div>',127,40,6,0);
+    at(3400,()=>{Sfx.loop('stream',1000);anim(stream,[{height:'0px'},{height:'10px'}],150)});
+    for(let k=1;k<=4;k++)at(3450+k*220,()=>prod.set(bucket(k/4)));
+    at(4400,()=>anim(stream,[{height:'10px'},{height:'0px'}],120))});
+  }},
+ {cap:'Die Conche rührt und walzt die Schokolade stundenlang, bis sie ganz glatt ist.',dur:4800,extra:3400,lift:true,stand:-22,in:[32,62],col:'#7f4a26',out:241,
+  run(c){const {at,put,anim,panim,prop,P,T,prod}=c;const wav=prop.querySelector('.p-wavy'),sm=prop.querySelectorAll('.p-smooth');
+   if(!c.opts.pour)panim(wav,[{opacity:1},{opacity:1}],1);
+   c.onLand=()=>panim(wav,[{opacity:0},{opacity:1}],300);
+   at(T,()=>{c.setAct('point');panim(wav,[{opacity:1},{opacity:1}],1);
+    Sfx.loop('conche',3300);panim(prop.querySelector('.p-roller'),[{transform:'translateX(0)'},{transform:'translateX(118px)'},{transform:'translateX(0)'}],1100,0,3);panim(prop.querySelector('.p-rstone'),[{transform:'rotate(0deg)'},{transform:'rotate(423deg)'},{transform:'rotate(0deg)'}],1100,0,3);panim(prop.querySelector('.p-fly'),[{transform:'rotate(0deg)'},{transform:'rotate(360deg)'}],550,0,6);
+    panim(prop.querySelector('.p-hand'),[{transform:'rotate(0deg)'},{transform:'rotate(1080deg)'}],3300);
+    put('<div class="sclabel">🕒 bis zu 3 Tage</div>',64,128,100,24,'opacity:0').animate([{opacity:0},{opacity:1}],{duration:300,delay:300,fill:'forwards'});
+    at(1500,()=>{panim(wav,[{opacity:1},{opacity:0}],1600);sm.forEach(e=>panim(e,[{opacity:0},{opacity:1}],1600))});
+    const stream=put('<div style="width:5px;height:100%;background:#5a2e14;border-radius:3px"></div>',P.out-16,34,5,0);
+    at(3400,()=>{Sfx.loop('stream',1200);anim(stream,[{height:'0px'},{height:'10px'}],120)});
+    for(let k=1;k<=5;k++)at(3400+k*220,()=>prod.set(jug(k/5,'#5a2e14',true)));
+    at(4600,()=>anim(stream,[{height:'10px'},{height:'0px'}],100))});
+  }},
+ {cap:'Die Schokolade kommt in Formen, wird im Kühltunnel fest, in Folie gewickelt und in Kartons verpackt.',dur:5200,extra:2900,stand:-22,in:[[19,84],[45,84],[71,84],[97,84]],col:'#5a2e14',out:326,
+  run(c){const {at,put,anim,panim,prop,P,T,prod}=c;const fills=[...prop.querySelectorAll('.p-fill')];
+   if(!c.opts.pour)fills.forEach(f=>panim(f,[{opacity:1},{opacity:1}],1));
+   c.onLand=k=>panim(fills[k],[{opacity:0},{opacity:1}],250);
+   at(T,()=>{c.setAct('point');fills.forEach(f=>panim(f,[{opacity:1},{opacity:1}],1));
+    Sfx.play('slide');Sfx.loop('conveyor',4000);Sfx.loop('cool',2800);panim(prop.querySelector('.p-molds'),[{transform:'translateX(0)',opacity:1},{transform:'translateX(120px)',opacity:1,offset:.8},{transform:'translateX(140px)',opacity:0}],1300);
+    panim(prop.querySelector('.p-dash'),[{strokeDashoffset:0},{strokeDashoffset:-48}],400,0,10);
+    for(let k=0;k<8;k++)at(300+k*200,()=>{const f=put('<svg width="12" height="12"><text x="0" y="11" font-size="12" fill="#fff">❄</text></svg>',140+(k*29)%70,96,12,12);anim(f,[{transform:'translateY(0)',opacity:1},{transform:'translateY(30px)',opacity:0}],900)});
+    // mitlaufen, damit Kühltunnel, Verpackung und Karton im Bild sind
+    at(250,()=>{c.setAct(null);c.walk(95)});at(1300,()=>c.walk(172));
+    at(1600,()=>{Sfx.loop('wrap',2600);panim(prop.querySelector('.p-roll'),[{transform:'rotate(0deg)'},{transform:'rotate(1080deg)'}],2600)});
+    let n=0;for(let k=0;k<5;k++)at(1600+k*420,()=>{
+     // braune Figur rollt aus dem Kühltunnel in die Verpackungsmaschine …
+     const d=put(`<svg viewBox="-10 -15 20 26" width="17" height="22" style="overflow:visible">${choc(MIX[k],0,0,1,'#5a2e14')}</svg>`,220,36,17,22);
+     anim(d,[{transform:'translate(0,0)',opacity:1},{transform:'translate(18px,0)',opacity:1,offset:.7},{transform:'translate(22px,0)',opacity:0}],420);
+     // … und kommt in roter Folie heraus und hüpft in den Karton
+     at(480,()=>{Sfx.play('stamp',.8);const e=put(`<svg viewBox="-13 -15 26 26" width="22" height="22" style="overflow:visible">${wrapped(MIX[k],0,0,1)}</svg>`,284,36,22,22),dx=P.out-294,dy=34-30;
+      anim(e,[{transform:'translate(0,0)'},{transform:`translate(${dx*.5}px,-24px)`},{transform:`translate(${dx}px,${dy}px)`,opacity:1,offset:.85},{transform:`translate(${dx}px,${dy}px)`,opacity:0}],480);
+      at(460,()=>{n++;Sfx.play('thud',.75);prod.set(carton(n))})})})});
+  }}
+];
+function playScene(i,onEnd,opts={}){
+ const S=SCENES[i],prop=$('#st'+i).lastElementChild;
+ const wr=$('#world').getBoundingClientRect(),pr=prop.getBoundingClientRect();
+ const propX=(pr.left-wr.left)/s,propW=pr.width/s,propH=pr.height/s;
+ const L=document.createElement('div');L.className='scene';L.style.cssText=`left:${propX}px;width:${propW}px;height:${propH}px`;$('#world').appendChild(L);
+ const timers=[],panims=[];const at=(ms,fn)=>timers.push(setTimeout(fn,ms));
+ const put=(html,x,y,w,hh,extra='')=>{const d=document.createElement('div');d.className='sp';d.style.cssText=`left:${x}px;bottom:${y}px;width:${w}px;height:${hh}px;${extra}`;d.innerHTML=html;L.appendChild(d);return d};
+ const anim=(d,frames,dur,delay=0,it=1)=>{try{return d.animate(frames,{duration:dur,delay,iterations:it,easing:'ease-in-out',fill:'forwards'})}catch(e){const f=frames[frames.length-1];for(const k in f)d.style[k]=f[k]}};
+ const panim=(el,frames,dur,delay=0,it=1)=>{if(!el)return;const a=anim(el,frames,dur,delay,it);if(a)panims.push(a);return a};
+ const geoLX=()=>{const lr=L.getBoundingClientRect(),w2=$('#world').getBoundingClientRect();return (lr.left-w2.left)/s};
+ const away=[...document.querySelectorAll('.deco')].filter(d=>{const x=parseFloat(d.style.left);return x>propX-60&&x<propX+propW+160});away.forEach(d=>d.classList.add('away'));
+ scene={L};keys.left=keys.right=false;document.body.classList.add('scene-on');
+ if(!opts.keepCarry){$('#carry').innerHTML='';$('#player').classList.remove('front');document.querySelector('#player .frontload').innerHTML='';setTool(null)}
+ target=propX+S.stand;
+ $('#tip').innerHTML=`<span class="go">🎬 ${S.cap}</span>`;placeTip();hideGuide();speak(S.cap,null,.62);
+ const skip=document.createElement('button');skip.id='skip';skip.textContent='Überspringen ⏭';skip.dataset.skip='sc'+i;skip.hidden=!canSkip('sc'+i);document.body.appendChild(skip);
+ // Produkt, das am Ende befüllt und mitgenommen wird
+ const pel=put(ITEMSVG(CARRY[i+1].empty||carton(0)),S.out-27,0,54,52);
+ const prod={set:inner=>{pel.innerHTML=ITEMSVG(inner)}};
+ const cur=load,item=cur!==null?CARRY[cur]:null;
+ const c={at,put,anim,panim,prop,L,opts,setAct,setTool,prod,P:S,onLand:null,walk:x=>{target=propX+x}};
+ // 1) Getragenes in die Maschine schütten (vorne: kippen; Sack auf dem Rücken: über die Schulter)
+ const pour=(t0,defer)=>{if(!item)return 0;const targets=Array.isArray(S.in[0])?S.in:[S.in,S.in,S.in,S.in,S.in];const n=targets.length;
+  const pt=S.lift?(item.front?650:850):(item.front?250:420); // ab hier fällt der Inhalt heraus
+  at(t0,()=>{const fr=!!item.front,el=fr?document.querySelector('#player .frontload'):$('#carry');
+   if(fr){el.style.transformBox='fill-box';el.style.transformOrigin='50% 50%'}
+   // S.lift: Behälter erst hochheben, dann von oben auskippen
+   const frames=S.lift?(fr?[{transform:'translate(0,0) rotate(0deg)'},{transform:'translate(4px,-28px) rotate(0deg)',offset:.5},{transform:'translate(10px,-30px) rotate(62deg)'}]
+     :[{transform:'rotate(-8deg)'},{transform:'translate(6px,-36px) rotate(-8deg)',offset:.35},{transform:'translate(36px,-46px) rotate(115deg)',offset:.75},{transform:'translate(36px,-46px) rotate(115deg)'}])
+    :(fr?[{transform:'rotate(0deg)'},{transform:'rotate(58deg) translate(5px,-3px)'}]:[{transform:'rotate(-8deg)'},{transform:'translate(32px,-24px) rotate(105deg)',offset:.45},{transform:'translate(32px,-24px) rotate(105deg)'}]);
+   if(S.lift)setAct('lift');
+   const tip=el.animate(frames,{duration:S.lift?(fr?800:1100):(fr?330:900),easing:'ease-in-out',fill:'forwards'});
+   at(pt,()=>{const wc=worldCenter(el),lx=geoLX(),sx=wc.x-lx+(fr?8:0),sy=404-wc.y+(fr?8:0);
+    for(let k=0;k<n;k++)at(k*130,()=>{const [tx,ty]=targets[k],d=put(fr&&cur===5?DROP(S.col):CLUMP(S.col),sx-9,sy-6,18,11),dx=tx-sx,dy=sy-ty;
+     anim(d,[{transform:'translate(0,0)',opacity:1},{transform:`translate(${dx*.5}px,${dy*.5-22}px)`,opacity:1},{transform:`translate(${dx}px,${dy}px)`,opacity:1,offset:.85},{transform:`translate(${dx}px,${dy+4}px)`,opacity:0}],480);
+     at(440,()=>{Sfx.play(cur>=3?'fill':'beans',.75);if(c.onLand)c.onLand(k)})})});
+   at(pt+n*130+300,()=>{tip.cancel();if(S.lift)setAct(null);
+    // leeren Behälter in den Händen behalten (z. B. erst die Leiter hinunter) oder gleich abstellen
+    if(defer){if(fr)el.innerHTML=FRONTLOAD(item.empty);else el.innerHTML=`<svg viewBox="0 0 50 60" width="50" height="60">${item.empty}</svg>`}else setDown()})});
+  return t0+pt+n*130+700};
+ // leeren Behälter hinter sich abstellen – er bleibt dort stehen
+ const setDown=()=>{if(!item)return;const fr=!!item.front;if(fr){document.querySelector('#player .frontload').innerHTML='';$('#player').classList.remove('front')}else $('#carry').innerHTML='';
+  const bx=px-dir*52,html=ITEMSVG(item.empty);flyFromPlayer(html,54,52,fr?10:-18,fr?40:62,{x:bx,y:404-26},300,()=>{junk.push({x:bx,html});renderGround()})};
+ let T=0;
+ const end=()=>{if(ended)return;ended=true;timers.forEach(clearTimeout);Sfx.stopLoops(.25);stopSpeech();if(!skipped)heard.add('sc'+i);if(climbAnim){climbAnim.cancel();climbAnim=null}$('#player').classList.remove('climb');playerLift=0;clearInterval(wait);panims.forEach(a=>{try{a.cancel()}catch(e){}});L.remove();away.forEach(d=>d.classList.remove('away'));skip.remove();setAct(null);setTool(null);scene=null;target=null;document.body.classList.remove('scene-on');onEnd()};
+ let ended=false,started=false,skipped=false;skip.onclick=()=>{skipped=true;end()};
+ const t0=Date.now();const safety=setTimeout(end,9500+(opts.extra||0));timers.push(safety);
+ const wait=setInterval(()=>{if(started)return;if(Math.abs(px-(propX+S.stand))<6||Date.now()-t0>1700){started=true;clearInterval(wait);target=null;dir=1;
+  if(opts.pour&&S.climb){
+   // Leiter hochklettern, von oben in den Trichter schütten, wieder herunterklettern
+   // (Leiter: langsam klettern; Hocker: kurzer Schritt hinauf)
+   const pl=$('#player'),up=`translateX(-50%) translateY(-${S.climb}px)`,down='translateX(-50%) translateY(0)',U=S.climbUp||1200,D=S.climbDown||1000;
+   const step=S.climb<40?[{transform:down},{transform:`translateX(-50%) translateY(-${S.climb+10}px)`,offset:.6},{transform:up}]:null;
+   at(80,()=>{pl.classList.add('climb');climbAnim=pl.animate(step||[{transform:down},{transform:up}],{duration:U,fill:'forwards'})});
+   at(90+U,()=>{pl.classList.remove('climb');playerLift=S.climb});
+   T=pour(150+U,true);
+   at(T,()=>{pl.classList.add('climb');if(climbAnim)climbAnim.cancel();climbAnim=pl.animate(step?[{transform:up},{transform:`translateX(-50%) translateY(-${S.climb+8}px)`,offset:.35},{transform:down}]:[{transform:up},{transform:down}],{duration:D,fill:'forwards'})});
+   at(T+D+10,()=>{pl.classList.remove('climb');if(climbAnim){climbAnim.cancel();climbAnim=null}playerLift=0});
+   at(T+D+100,setDown); // erst unten den leeren Behälter abstellen
+   T+=D+550}
+  else if(opts.pour)T=pour(80);c.T=T;
+  at(S.dur+(opts.pour?(T+1300):0),end);
+  try{S.run(c)}catch(e){console.error(e);end();return}
+  // 3) zum fertigen Zwischenprodukt gehen und es mitnehmen
+  if(opts.pour){const tEnd=T+S.dur-200;
+   at(tEnd,()=>{target=propX+S.out-36});
+   at(tEnd+800,()=>{setAct('reach');const tx=px+dir*24-propX-27;anim(pel,[{transform:'translate(0,0)'},{transform:`translate(${(tx-(S.out-27))*.5}px,-24px)`},{transform:`translate(${tx-(S.out-27)}px,-16px) scale(.85)`}],300)});
+   at(tEnd+1120,()=>{pel.style.visibility='hidden';const keep=load;load=i+1;updateCarry();load=keep;setAct(null)})}
+ }},60);
+}
+
+/* ---------- Laderampe: einladen und abfahren ---------- */
+let delivered=false;
+function deliver(){scene={mini:true};keys.left=keys.right=false;const standX=3212;target=standX;const t0=Date.now();
+ const tr=$('#truck'),door=tr.querySelector('.door'),cargo=tr.querySelector('.cargo');
+ const ts=[],later=(f,ms)=>{ts.push(setTimeout(f,ms))};let liftAnim=null,over=false;
+ const skip=document.createElement('button');skip.id='skip';skip.textContent='Überspringen ⏭';skip.dataset.skip='deliver';skip.hidden=!canSkip('deliver');document.body.appendChild(skip);
+ skip.onclick=()=>{over=true;ts.forEach(clearTimeout);clearInterval(wait);Sfx.stopLoops(.2);if(liftAnim)liftAnim.cancel();target=null;load=null;updateCarry();setAct(null);cargo.setAttribute('opacity',1);tr.getAnimations({subtree:true}).forEach(a=>a.cancel());tr.animate([{transform:'translateX(520px)'}],{duration:1,fill:'forwards'});finish()};
+ const finish=()=>{skip.remove();delivered=true;scene=null;confetti(60);updateMarkers();nearCur='x';openEnd()};
+ const wait=setInterval(()=>{if(Math.abs(px-standX)>6&&Date.now()-t0<1600)return;clearInterval(wait);target=null;dir=1;
+  // Tür auf, Kiste hochheben und hineinschieben
+  door.animate([{opacity:1},{opacity:0}],{duration:250,fill:'forwards'});Sfx.play('clack',.8);
+  setAct('lift');const fl=document.querySelector('#player .frontload');fl.style.transformBox='fill-box';fl.style.transformOrigin='50% 50%';
+  const lift=liftAnim=fl.animate([{transform:'translate(0,0)'},{transform:'translate(4px,-22px)'}],{duration:380,fill:'forwards'});
+  later(()=>{lift.cancel();liftAnim=null;load=null;updateCarry();setAct(null);
+   flyFromPlayer(ITEMSVG(CARRY[6].svg),54,52,24,62,{x:3262,y:404-58},420,()=>{if(over)return;cargo.setAttribute('opacity',1);Sfx.play('thud');
+    later(()=>{Sfx.play('clack',.9);door.getAnimations().forEach(a=>a.cancel());door.animate([{opacity:0},{opacity:1}],{duration:250,fill:'forwards'})},250);
+    // Lastwagen fährt ab
+    later(()=>{Sfx.loop('truck',2300);tr.querySelectorAll('.whl').forEach(w=>w.animate([{transform:'rotate(0deg)'},{transform:'rotate(1080deg)'}],{duration:2300,easing:'ease-in',fill:'forwards'}));
+     tr.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)',offset:.08},{transform:'translateX(520px)'}],{duration:2300,easing:'ease-in',fill:'forwards'});
+     for(let k=0;k<6;k++)later(()=>{const pf=document.createElement('div');const wx=parseFloat(getComputedStyle(tr).transform.split(',')[4])||0;
+      pf.style.cssText=`position:absolute;left:${3140+wx}px;bottom:${118}px;width:18px;height:18px;border-radius:50%;background:#c9cdd0;opacity:.8;z-index:2`;$('#world').appendChild(pf);
+      pf.animate([{transform:'translate(0,0) scale(.6)',opacity:.8},{transform:'translate(-30px,-30px) scale(1.8)',opacity:0}],{duration:900,fill:'forwards'});setTimeout(()=>pf.remove(),950)},k*220);
+     later(()=>{heard.add('deliver');finish()},2400)},650)})},420)},40)}
+
+/* ---------- Ende: Laderampe, Quiz, Urkunde ---------- */
+const QUIZ=[
+ ['Was passiert in der Fabrik als Erstes mit den Kakaobohnen?',['Sie werden in Formen gegossen','Sie werden gereinigt und sortiert','Sie werden verpackt'],1],
+ ['Warum werden die Bohnen geröstet?',['Damit sie nach Schokolade schmecken und riechen','Damit sie grün werden','Damit sie wieder wachsen'],0],
+ ['Warum wird die gemahlene Kakaomasse dickflüssig?',['Weil Wasser dazukommt','Weil die Kakaobutter schmilzt','Weil sie geschüttelt wird'],1],
+ ['Was kommt für Milchschokolade dazu?',['Zucker, Salz und Mehl','Zucker, Milchpulver und zusätzliche Kakaobutter','Ketchup und Senf'],1],
+ ['Wozu ist die Conche da?',['Sie rührt die Schokolade ganz glatt','Sie kühlt die Schokolade','Sie pflückt Kakaofrüchte'],0],
+ ['Warum wird Schokolade in Folie verpackt?',['Damit sie schneller schmilzt','Zum Schutz vor Licht, Luft und Gerüchen','Damit sie schwerer wird'],1]];
+function openEnd(){
+ showModal(`<div class="head"><span class="num">🚚</span><h2>Ab in den Laden!</h2><button class="iconbtn" id="cls">✕</button></div>
+  <p class="intro">Die Schokolade wird verpackt und mit dem Lastwagen in die Supermärkte gebracht. So ist aus der Kakaobohne Schokolade geworden:</p>
+  <div class="steps"><div class="step"><big>🧹</big>Reinigen</div><div class="step"><big>🔥</big>Rösten</div><div class="step"><big>⚙️</big>Brechen und mahlen</div><div class="step"><big>🥛</big>Mischen</div><div class="step"><big>🌀</big>Conchieren</div><div class="step"><big>❄️</big>Formen und kühlen</div><div class="step"><big>📦</big>Verpacken</div></div>
+  <div class="think"><b>🤔 Zum Nachdenken:</b> Gibt es auch in deiner Nähe eine Schokoladenfabrik?</div>
+  <button class="btn big" id="toQuiz">Zum Quiz ✏️</button>`);
+ $('#cls').onclick=hideModal;$('#toQuiz').onclick=()=>quiz(0,0);
+}
+function quiz(q,score){
+ if(q>=QUIZ.length)return cert(score);
+ const [frage,opts,ok]=QUIZ[q];
+ showModal(`<div class="head"><span class="num">${q+1}</span><h2>Quiz</h2><button class="skipbtn" id="qskip" data-skip="teacher" hidden>Quiz überspringen ⏭</button><button class="iconbtn" id="spk">🔊</button></div><p class="intro"><b>${frage}</b></p>${opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}<div id="qn"></div>`);
+ $('#spk').onclick=()=>speak(frage+' '+opts.join('? Oder: ')+'?');$('#qskip').onclick=()=>cert(score);refreshSkips();
+ let answered=false;
+ document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(answered)return;answered=true;const i=+b.dataset.i;
+  document.querySelectorAll('.opt')[ok].classList.add('right');if(i!==ok)b.classList.add('wrong');
+  $('#qn').innerHTML=`<p class="hint ${i===ok?'good':''}">${i===ok?'Richtig! 🎉':'Nicht ganz – die grüne Antwort stimmt.'}</p><button class="btn big" id="qnext">Weiter</button>`;
+  $('#qnext').onclick=()=>quiz(q+1,score+(i===ok?1:0))});
+}
+function cert(score){
+ showModal(`<div class="cert"><div style="font-size:44px">🏅🍫</div><h1>Urkunde</h1><div>Hiermit wird bestätigt, dass</div><div class="nm">${playerName||'unser Fabrik-Profi'}</div><div>in der Schokoladenfabrik mitgearbeitet hat<br>und jetzt <b>Schokoladen-Profi</b> ist!</div><p>Quiz: <b>${score} von ${QUIZ.length}</b> richtig</p></div>
+  <div class="row"><button class="btn" id="again">↺ Nochmal spielen</button><button class="btn green" id="stay">Weiter umsehen</button></div>`);
+ confetti(90);$('#again').onclick=resetGame;$('#stay').onclick=hideModal;
+}
+function openStart(){
+ showModal(`<div style="text-align:center"><div style="font-size:52px">🏭🍫</div><h2 style="font-size:26px;margin:4px 0">Schokoladenfabrik</h2>
+  <p class="intro">Die Kakaosäcke vom Hafen sind angekommen! Bring sie durch die Fabrik und hilf an den sechs Maschinen mit, bis aus den Bohnen Schokolade geworden ist. <b>Wichtig:</b> In der Fabrik braucht man Kittel und Haube – die hängen gleich am Eingang.</p>
+  <p><input class="name" id="nm" placeholder="Dein Name" maxlength="24"></p>
+  <p style="font-size:15px;opacity:.8">Laufen: Pfeiltasten ◀ ▶ oder auf den Boden tippen</p>
+  <button class="btn big" id="go">Los geht's! 🚶</button></div>`);
+ $('#go').onclick=()=>{setTimeout(enterFS,0);playerName=$('#nm').value.trim().replace(/[<>&"]/g,'');hideModal();nearCur='x';say(`Hallo${playerName?' '+playerName:''}! Ich bin Meister Lenz und leite die Produktionshalle hier in der Schokoladenfabrik. Heute hilfst du mir. Zieh dir vorne am Eingang Kittel und Haube an, dann geht es los!`)};
+}
+
+/* ---------- Vollbild ---------- */
+const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
+const fsOK=!!(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen);
+const isIOS=/iPhone|iPod/.test(navigator.userAgent)||(/iPad|Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+const standalone=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+function enterFS(){const d=document.documentElement;if(fsEl()||standalone)return;
+ if(!fsOK){if(isIOS)iosHint();return}
+ try{const r=d.requestFullscreen?d.requestFullscreen({navigationUI:'hide'}):d.webkitRequestFullscreen();
+  const lock=()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})}catch(e){}};
+  if(r&&r.then)r.then(lock).catch(()=>{if(isIOS)iosHint()});else lock()}catch(e){if(isIOS)iosHint()}}
+function iosHint(){let seen=false;try{seen=sessionStorage.getItem('fsHint')}catch(e){}if(seen&&!iosHint.force)return;iosHint.force=false;try{sessionStorage.setItem('fsHint',1)}catch(e){}
+ showModal(`<div style="text-align:center"><div style="font-size:44px">📱</div><h2 style="margin:4px 0 8px">Vollbild auf dem iPhone</h2><p class="intro">Safari erlaubt auf dem iPhone kein Vollbild für Webseiten. So klappt es trotzdem:</p>
+  <div class="steps"><div class="step"><big>⬆️</big>Unten auf <b>Teilen</b> tippen</div><div class="step"><big>➕</big><b>Zum Home-Bildschirm</b> wählen</div><div class="step"><big>🍫</big>Spiel über das neue Symbol starten</div></div>
+  <p style="font-size:15px;opacity:.8">Tipp: Drehe das Handy quer, dann siehst du mehr von der Fabrik.</p><button class="btn big" id="okfs">Verstanden – weiterspielen</button></div>`);
+ $('#okfs').onclick=()=>{hideModal();nearCur='x'}}
+function exitFS(){try{(document.exitFullscreen||document.webkitExitFullscreen).call(document)}catch(e){}}
+function fsIcon(){$('#fsbtn').textContent=fsEl()?'✕':'⛶';$('#fsbtn').title=fsEl()?'Vollbild beenden':'Vollbild';setTimeout(layout,200)}
+if(standalone||(!fsOK&&!isIOS))$('#fsbtn').style.display='none';
+$('#menubtn').onclick=()=>{if(!modalOpen&&!scene)openMenu()};
+function sndIcon(){const off=Sfx.isMuted(),b=$('#sndbtn');b.textContent=off?'🔕':'🔔';b.title=off?'Ton einschalten':'Ton ausschalten';b.setAttribute('aria-label',b.title)}
+$('#sndbtn').onclick=()=>{Sfx.toggle();stopSpeech();sndIcon();if(sayNow){const l=sayNow;sayNow=null;playLine(l)}};sndIcon();
+$('#gskip').onclick=()=>{stopSpeech();lineDone()};$('#tstation').onclick=skipStation;
+$('#fsbtn').onclick=()=>{if(fsEl())exitFS();else if(!fsOK){iosHint.force=true;iosHint()}else enterFS()};
+document.addEventListener('fullscreenchange',fsIcon);document.addEventListener('webkitfullscreenchange',fsIcon);
+
+/* ---------- Spielmenü: Name ändern, neu starten ---------- */
+function resetGame(){heard.clear();clearLines();stopSpeech();saidDressed=false;delivered=false;{const t=$('#truck');if(t){t.getAnimations({subtree:true}).forEach(a=>a.cancel());t.style.transform='';t.querySelector('.cargo').setAttribute('opacity',0);t.querySelector('.door').setAttribute('opacity',1)}}done=0;load=0;dressed=false;dropped=null;loadOrigin=140;junk=[];
+ renderGround();px=140;dir=1;target=null;hideModal();updateMarkers();updateCarry();nearCur='x'}
+function openMenu(){
+ showModal(`<div class="head" id="menuhead"><span class="num">☰</span><h2>Spielmenü</h2><button class="iconbtn" id="cls" aria-label="Schließen">✕</button></div>
+  <p class="intro" style="margin-bottom:4px"><b>Dein Name</b> (steht später auf der Urkunde)</p>
+  <div class="row" style="justify-content:flex-start;margin-top:4px"><input class="name" id="mname" maxlength="24" placeholder="Dein Name"><button class="btn green" id="msave">Speichern</button></div>
+  <p class="hint good" id="mhint"></p>
+  <p class="intro" style="margin:14px 0 4px"><b>Fortschritt:</b> ${done} von 6 Stationen geschafft</p>
+  <div id="mrestart" class="row" style="justify-content:flex-start"><button class="btn" id="mreset">↺ Spiel neu starten</button></div>
+  <div id="mteacher" class="row" style="justify-content:flex-start;margin-top:8px"></div>
+  <button class="btn big" id="mback">Weiterspielen ▶</button>`);
+ teacherMenu();const inp=$('#mname');inp.value=playerName;
+ const save=()=>{playerName=inp.value.trim().replace(/[<>&"]/g,'');$('#mhint').textContent=playerName?`Gespeichert: ${playerName}`:'Name gelöscht'};
+ $('#msave').onclick=save;inp.addEventListener('keydown',e=>{if(e.key==='Enter')save()});
+ $('#mreset').onclick=()=>{$('#mrestart').innerHTML='<span style="font-weight:bold;align-self:center">Wirklich von vorne anfangen? Der Fortschritt geht verloren.</span><button class="btn" id="myes" style="background:#d9542b;box-shadow:0 4px 0 #9c3a1c">Ja, neu starten</button><button class="btn green" id="mno">Nein</button>';
+  $('#myes').onclick=()=>{resetGame();confetti(20)};$('#mno').onclick=()=>{hideModal();openMenu()}};
+ const close=()=>{hideModal();nearCur='x'};$('#cls').onclick=close;$('#mback').onclick=close}
+
+/* ---------- Steuerung ---------- */
+function hold(id,k){const b=$(id);const on=e=>{e.preventDefault();keys[k]=true;target=null;b.classList.add('on')};const off=()=>{keys[k]=false;b.classList.remove('on')};
+ b.addEventListener('pointerdown',on);['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,off))}
+hold('#left','left');hold('#right','right');
+$('#action').onclick=act;
+$('#game').addEventListener('pointerdown',e=>{if(!modalOpen&&!scene)target=cam+e.clientX/s});
+addEventListener('keydown',e=>{if(e.key==='Escape'){if(!modalOpen&&!scene)openMenu();return}if(e.target.tagName==='INPUT')return;if(['ArrowLeft','a','A'].includes(e.key)){keys.left=true;target=null}if(['ArrowRight','d','D'].includes(e.key)){keys.right=true;target=null}if((e.key===' '||e.key==='Enter')&&!modalOpen){e.preventDefault();act()}});
+addEventListener('keyup',e=>{if(['ArrowLeft','a','A'].includes(e.key))keys.left=false;if(['ArrowRight','d','D'].includes(e.key))keys.right=false});
+addEventListener('resize',layout);
+$('#gfig').innerHTML=MEISTER;build();renderGround();updateCarry();layout();openStart();$('#carry').addEventListener('animationend',e=>{if(e.animationName==='carrypop')e.currentTarget.classList.remove('pop')});requestAnimationFrame(loop);
+</script>
+
+
+</body></html>
