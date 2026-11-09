@@ -9,7 +9,7 @@ ROOT=Path(__file__).resolve().parents[1]
 DASH=re.compile(r'\s*[–—]\s*|\s+-\s+')
 def speech_parts(text):
     # This changes pronunciation only; the displayed transcript stays unchanged.
-    return [p.strip().replace('Conchieren','Konschieren').replace('Conche','Konsche').replace('„','').replace('“','') for p in DASH.split(text) if p.strip()]
+    return [p.strip().replace('Conchieren','Konschieren').replace('Conche','Konsche').replace('Kakaokernen','Kakao Kernen').replace('„','').replace('“','') for p in DASH.split(text) if p.strip()]
 async def command(*args):
     proc=await asyncio.create_subprocess_exec(*args,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE)
     out,err=await proc.communicate()
@@ -37,14 +37,16 @@ async def render_part(part,manifest,mp3):
     pcm=await command('ffmpeg','-v','error','-i',str(mp3),'-f','s16le','-ar','24000','-ac','1','pipe:1')
     start=0
     if span:
-        # Keep the end of the exact requested sentence, removing "Das habe ich".
-        assert first>0 and first+count==len(boundaries),(part,boundaries)
+        # Remove leading context words and end the clip before any follow-up.
+        assert first>0,(part,boundaries)
         previous_end=(boundaries[first-1]['offset']+boundaries[first-1]['duration'])/10_000_000
         word_start=kept[0]['offset']/10_000_000
         start=max(previous_end,word_start-.015)
-        end=len(pcm)/2/24000
+        last_end=(kept[-1]['offset']+kept[-1]['duration'])/10_000_000
+        next_start=boundaries[first+count]['offset']/10_000_000 if first+count<len(boundaries) else None
+        end=last_end+min(.18,(next_start-last_end)/2) if next_start is not None else len(pcm)/2/24000
         mp3.with_name('source-sentence.mp3').write_bytes(mp3.read_bytes())
-        audit={'removed_words':[b['text'] for b in boundaries[:first]],'previous_word_end_seconds':previous_end,'word_start_seconds':word_start,'next_word':None,'next_word_seconds':None}
+        audit={'removed_words':[b['text'] for b in boundaries[:first]],'previous_word_end_seconds':previous_end,'word_start_seconds':word_start,'next_word':boundaries[first+count]['text'] if next_start is not None else None,'next_word_seconds':next_start}
     else:
         assert len(boundaries)>count,(part,boundaries)
         last_end=(kept[-1]['offset']+kept[-1]['duration'])/10_000_000
@@ -69,6 +71,7 @@ async def main(manifest_path=None):
         leading_dash=bool(re.match(r'^\s*[–—-](?:\s|$)',text))
         context=manifest.get('contexts',{}).get(text)
         version=('Lenz-context-v2-span:'+context+json.dumps(manifest['context_spans'][text],sort_keys=True)) if text in manifest.get('context_spans',{}) else ('Lenz-context-v1:'+context) if context else ('Lenz-Conche-v1-leading' if leading_dash else 'Lenz-Conche-v1')
+        if 'Kakaokernen' in text:version+=':Kakaokernen-as-Kakao-Kernen-v1'
         signature=hashlib.sha256(json.dumps([text,manifest['voice'],manifest['rate'],manifest['pitch'],manifest.get('dash_pause_ms',350),version]).encode()).hexdigest()
         if target.exists() and target.stat().st_size>1000 and state.get(clip['file'])==signature:
             state[clip['file']]=signature;return
@@ -84,7 +87,7 @@ async def main(manifest_path=None):
                             if cut:
                                 cuts[clip['file']]=cut
                                 if cut.get('removed_words'):
-                                    (folder/'lenz-geschafft-quellsatz.mp3').write_bytes(mp3.with_name('source-sentence.mp3').read_bytes())
+                                    (folder/(target.stem+'-quellsatz.mp3')).write_bytes(mp3.with_name('source-sentence.mp3').read_bytes())
                         silence=bytes(int(24000*manifest.get('dash_pause_ms',350)/1000)*2)
                         wav=Path(tmpdir)/'speech.wav'
                         with wave.open(str(wav),'wb') as out:

@@ -16,7 +16,8 @@ for(const t of texts){const first=parts(t)[0];if(['Hallo!','Geschafft!','Sauber!
 const firstFact=vm.runInNewContext("'"+s.match(/fact:'((?:[^'\\]|\\.)*)'/)[1]+"'");
 contexts['Wusstest du schon?']='Wusstest du schon? '+firstFact;
 contexts['Geschafft!']='Das habe ich geschafft.';
-const context_spans={'Geschafft!':{first_word:3,word_count:1}};
-const manifest={voice:'de-DE-FlorianMultilingualNeural',rate:'-12%',pitch:'-16Hz',dash_pause_ms:350,pronunciations:{Conchieren:'Konschieren',Conche:'Konsche'},contexts,context_spans,clips};
+contexts['Sauber!']='Das ist sauber! Bring die Kiste jetzt zu Station 2 zum Rösten.';
+const context_spans={'Geschafft!':{first_word:3,word_count:1},'Sauber!':{first_word:2,word_count:1}};
+const manifest={voice:'de-DE-FlorianMultilingualNeural',rate:'-12%',pitch:'-16Hz',dash_pause_ms:350,pronunciations:{Conchieren:'Konschieren',Conche:'Konsche',Kakaokernen:'Kakao Kernen'},contexts,context_spans,clips};
 fs.writeFileSync(path.join(root,'assets/audio/lenz-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
 console.log(`${clips.length} Meister Lenz sentences extracted from displayed lesson text.`);

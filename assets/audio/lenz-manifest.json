@@ -5,16 +5,27 @@
   "dash_pause_ms": 350,
   "pronunciations": {
     "Conchieren": "Konschieren",
-    "Conche": "Konsche"
+    "Conche": "Konsche",
+    "Kakaokernen": "Kakao Kernen"
   },
   "contexts": {
-    "Sauber!": "Sauber! Bring die Kiste jetzt zu Station 2 zum Rösten.",
+    "Sauber!": "Das ist sauber! Bring die Kiste jetzt zu Station 2 zum Rösten.",
     "Riechst du das?": "Riechst du das? So duftet es, wenn Kakao geröstet wird. Weiter geht es zu Station 3.",
     "Schön glatt!": "Schön glatt! Bring die Kanne zu Station 6. Dort kommt die Schokolade in Formen.",
     "Geschafft!": "Das habe ich geschafft.",
     "Sehr gut!": "Sehr gut! Mit Kittel und Haube darfst du an die Maschinen. Nimm den Kakaosack mit zu Station 1.",
     "Hallo!": "Hallo! Ich bin Meister Lenz und leite die Produktionshalle hier in der Schokoladenfabrik. Heute hilfst du mir. Zieh dir vorne am Eingang Kittel und Haube an, dann geht es los!",
     "Wusstest du schon?": "Wusstest du schon? In der Fabrik sortieren Maschinen mit Sieben, Magneten und Luftgebläsen alles aus, was nicht in die Schokolade gehört."
+  },
+  "context_spans": {
+    "Geschafft!": {
+      "first_word": 3,
+      "word_count": 1
+    },
+    "Sauber!": {
+      "first_word": 2,
+      "word_count": 1
+    }
   },
   "clips": [
     {
@@ -32,6 +43,10 @@
     {
       "text": "Aus den Kernen ist Kakaomasse geworden.",
       "file": "lenz-3a9c71fa0436.mp3"
+    },
+    {
+      "text": "Bei dieser alten Conche schiebt ein großes Schwungrad über eine lange Stange eine schwere Walze im Trog hin und her.",
+      "file": "lenz-fe719c96cd48.mp3"
     },
     {
       "text": "Beim Mahlen wird es warm, die Kakaobutter schmilzt – deshalb wird alles dickflüssig.",
@@ -132,6 +147,10 @@
     {
       "text": "Dort kommt die Schokolade in Formen.",
       "file": "lenz-e4ed13b5ae87.mp3"
+    },
+    {
+      "text": "Dreh das Schwungrad, bis die Schokolade ganz glatt ist.",
+      "file": "lenz-40f1cdc49d63.mp3"
     },
     {
       "text": "Erst dadurch riecht und schmeckt es nach Schokolade.",
@@ -248,10 +267,6 @@
     {
       "text": "Sauber!",
       "file": "lenz-c4f9ff7584cc.mp3"
-    },
-    {
-      "text": "Schieb die Walze hin und her, bis die Schokolade ganz glatt ist.",
-      "file": "lenz-b7eb17d3c5fe.mp3"
     },
     {
       "text": "Schön glatt!",
@@ -389,11 +404,5 @@
       "text": "Zum Schutz vor Licht, Luft und Gerüchen",
       "file": "lenz-348769674d9d.mp3"
     }
-  ],
-  "context_spans": {
-    "Geschafft!": {
-      "first_word": 3,
-      "word_count": 1
-    }
-  }
+  ]
 }

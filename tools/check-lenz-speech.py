@@ -23,10 +23,16 @@ for text,context in m.get('contexts',{}).items():
     assert cut['context']==context and cut['text']==text
     assert speech.words(' '.join(cut['kept_words']))==speech.words(text)
     if text in m.get('context_spans',{}):
-        assert text=='Geschafft!' and context=='Das habe ich geschafft.'
-        assert speech.words(' '.join(cut['removed_words']))==['das','habe','ich']
+        if text=='Geschafft!':
+            assert context=='Das habe ich geschafft.'
+            assert speech.words(' '.join(cut['removed_words']))==['das','habe','ich']
+            assert speech.words(' '.join(cut['kept_words']))==['geschafft']
+        elif text=='Sauber!':
+            assert context=='Das ist sauber! Bring die Kiste jetzt zu Station 2 zum Rösten.'
+            assert speech.words(' '.join(cut['removed_words']))==['das','ist']
+            assert cut['next_word']=='Bring'
+            assert speech.words(' '.join(cut['kept_words']))==['sauber']
         assert cut['previous_word_end_seconds']<=cut['start_seconds']<=cut['word_start_seconds']
-        assert speech.words(' '.join(cut['kept_words']))==['geschafft']
     else:
         assert cut['cut_seconds']<=cut['next_word_seconds']
     duration=float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','default=noprint_wrappers=1:nokey=1',str(root/'assets/audio'/clip['file'])],text=True))

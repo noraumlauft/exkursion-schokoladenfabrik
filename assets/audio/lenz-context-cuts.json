@@ -41,13 +41,20 @@
   },
   "lenz-c4f9ff7584cc.mp3": {
     "text": "Sauber!",
-    "context": "Sauber! Bring die Kiste jetzt zu Station 2 zum Rösten.",
+    "context": "Das ist sauber! Bring die Kiste jetzt zu Station 2 zum Rösten.",
     "kept_words": [
-      "Sauber"
+      "sauber"
     ],
-    "cut_seconds": 0.956124,
+    "start_seconds": 0.582374,
+    "cut_seconds": 1.3731659999999999,
+    "removed_words": [
+      "Das",
+      "ist"
+    ],
+    "previous_word_end_seconds": 0.582374,
+    "word_start_seconds": 0.582375,
     "next_word": "Bring",
-    "next_word_seconds": 1.157958
+    "next_word_seconds": 1.569875
   },
   "lenz-8e2f72d1706c.mp3": {
     "text": "Schön glatt!",

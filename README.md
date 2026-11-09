@@ -97,3 +97,11 @@ Das Manifest enthält die Auswahl unter `context_spans`; die Textübernahme
 behält diesen Sonderfall bei. Tests prüfen den exakten Quellsatz, die drei
 entfernten Wörter, das beibehaltene letzte Wort, die Schnittzeit und die
 Dauer des Ergebnisses. Die anderen Aufnahmen bleiben unverändert.
+
+### „Sauber!“ aus dem Satz ausschneiden
+
+Der Ausruf wird aus „Das ist sauber! Bring die Kiste jetzt zu Station 2 zum
+Rösten.“ gewonnen. „Das ist“ wird anhand der Wortzeitmarken entfernt; der Clip
+endet direkt nach „sauber“, vor dem anschließenden „Bring“. Vollständiger
+Quellsatz: `assets/audio/lenz-c4f9ff7584cc-quellsatz.mp3`.
+Im Spiel verwendeter Ausschnitt: `assets/audio/lenz-c4f9ff7584cc.mp3`.
