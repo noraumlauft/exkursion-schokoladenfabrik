@@ -1,0 +1,399 @@
+{
+  "voice": "de-DE-FlorianMultilingualNeural",
+  "rate": "-12%",
+  "pitch": "-16Hz",
+  "dash_pause_ms": 350,
+  "pronunciations": {
+    "Conchieren": "Konschieren",
+    "Conche": "Konsche"
+  },
+  "contexts": {
+    "Sauber!": "Sauber! Bring die Kiste jetzt zu Station 2 zum Rösten.",
+    "Riechst du das?": "Riechst du das? So duftet es, wenn Kakao geröstet wird. Weiter geht es zu Station 3.",
+    "Schön glatt!": "Schön glatt! Bring die Kanne zu Station 6. Dort kommt die Schokolade in Formen.",
+    "Geschafft!": "Das habe ich geschafft.",
+    "Sehr gut!": "Sehr gut! Mit Kittel und Haube darfst du an die Maschinen. Nimm den Kakaosack mit zu Station 1.",
+    "Hallo!": "Hallo! Ich bin Meister Lenz und leite die Produktionshalle hier in der Schokoladenfabrik. Heute hilfst du mir. Zieh dir vorne am Eingang Kittel und Haube an, dann geht es los!",
+    "Wusstest du schon?": "Wusstest du schon? In der Fabrik sortieren Maschinen mit Sieben, Magneten und Luftgebläsen alles aus, was nicht in die Schokolade gehört."
+  },
+  "clips": [
+    {
+      "text": "Ab damit zu Station 5, zur Conche.",
+      "file": "lenz-b8c3858afb5b.mp3"
+    },
+    {
+      "text": "Aber Vorsicht: Werden die Bohnen zu heiß, verbrennen sie und schmecken bitter.",
+      "file": "lenz-36bf2b0ed3d0.mp3"
+    },
+    {
+      "text": "Alles wird im großen Mischer gut verrührt.",
+      "file": "lenz-0d5f25ec2b06.mp3"
+    },
+    {
+      "text": "Aus den Kernen ist Kakaomasse geworden.",
+      "file": "lenz-3a9c71fa0436.mp3"
+    },
+    {
+      "text": "Beim Mahlen wird es warm, die Kakaobutter schmilzt – deshalb wird alles dickflüssig.",
+      "file": "lenz-4792068088d9.mp3"
+    },
+    {
+      "text": "Beim Rösten riecht es in der ganzen Fabrik nach Kakao.",
+      "file": "lenz-9c726ae01b25.mp3"
+    },
+    {
+      "text": "Bring die Kanne zu Station 6.",
+      "file": "lenz-e85f3eadcb20.mp3"
+    },
+    {
+      "text": "Bring die Kiste jetzt zu Station 2 zum Rösten.",
+      "file": "lenz-33e0ea466633.mp3"
+    },
+    {
+      "text": "Dabei passiert etwas Erstaunliches: Aus den festen Kernen wird eine dickflüssige, braune Masse!",
+      "file": "lenz-82bb06bf914a.mp3"
+    },
+    {
+      "text": "Damit sie grün werden",
+      "file": "lenz-00fe5c24a402.mp3"
+    },
+    {
+      "text": "Damit sie nach Schokolade schmecken und riechen",
+      "file": "lenz-5aa716b25326.mp3"
+    },
+    {
+      "text": "Damit sie schneller schmilzt",
+      "file": "lenz-918cb5653375.mp3"
+    },
+    {
+      "text": "Damit sie schwerer wird",
+      "file": "lenz-8e2345fab004.mp3"
+    },
+    {
+      "text": "Damit sie wieder wachsen",
+      "file": "lenz-689c5bb34981.mp3"
+    },
+    {
+      "text": "Der Brecher knackt die Bohnen, das Gebläse pustet die Schalen weg, die Mühle macht Kakaomasse.",
+      "file": "lenz-03411f8081ad.mp3"
+    },
+    {
+      "text": "Der Lastwagen wartet schon.",
+      "file": "lenz-9e59d710e4ac.mp3"
+    },
+    {
+      "text": "Die Bohnen laufen über das Rüttelband.",
+      "file": "lenz-1f904109f15b.mp3"
+    },
+    {
+      "text": "Die Conche hat der Schweizer Rodolphe Lindt im Jahr 1879 erfunden.",
+      "file": "lenz-965ef5a4eb55.mp3"
+    },
+    {
+      "text": "Die Conche rührt und walzt die Schokolade stundenlang, bis sie ganz glatt ist.",
+      "file": "lenz-f48c0921ab65.mp3"
+    },
+    {
+      "text": "Die Kakaosäcke vom Hafen sind angekommen.",
+      "file": "lenz-0f2ee9024e27.mp3"
+    },
+    {
+      "text": "Die Kerne werden dann ganz fein gemahlen.",
+      "file": "lenz-0639cb4ed17b.mp3"
+    },
+    {
+      "text": "Die Schokolade kommt in Formen, wird im Kühltunnel fest, in Folie gewickelt und in Kartons verpackt.",
+      "file": "lenz-33743f9fd9ff.mp3"
+    },
+    {
+      "text": "Die Schokoladenmasse ist noch ein bisschen körnig.",
+      "file": "lenz-15139ae16cc2.mp3"
+    },
+    {
+      "text": "Die Trommel ist ungefähr 120 bis 140 Grad Celsius heiß – viel heißer als ein Sommertag!",
+      "file": "lenz-a576925131a0.mp3"
+    },
+    {
+      "text": "Die bunte Folie schützt die Schokolade vor Licht, Luft und fremden Gerüchen.",
+      "file": "lenz-c2675ecca69b.mp3"
+    },
+    {
+      "text": "Die dünne Schale kommt weg – für Schokolade braucht man nur das Innere, die Kakaokerne.",
+      "file": "lenz-eefa802c341e.mp3"
+    },
+    {
+      "text": "Die sauberen Bohnen kommen in eine große, heiße Trommel und werden geröstet – so ähnlich wie Nüsse in der Pfanne.",
+      "file": "lenz-a65612cd5ee1.mp3"
+    },
+    {
+      "text": "Diese Masse heißt Kakaomasse.",
+      "file": "lenz-8b361d69ddb6.mp3"
+    },
+    {
+      "text": "Dort kommt die Schokolade in Formen.",
+      "file": "lenz-e4ed13b5ae87.mp3"
+    },
+    {
+      "text": "Erst dadurch riecht und schmeckt es nach Schokolade.",
+      "file": "lenz-7b9826f8cf71.mp3"
+    },
+    {
+      "text": "Es duftet nach Schokolade!",
+      "file": "lenz-e2a80daaad0d.mp3"
+    },
+    {
+      "text": "Füll die Formen, kühl sie, klopf die Schokolade heraus und pack sie ein.",
+      "file": "lenz-7a6d21f9a8a6.mp3"
+    },
+    {
+      "text": "Für Milchschokolade kommen noch Zucker, Milchpulver und extra Kakaobutter dazu.",
+      "file": "lenz-dd83dab289c5.mp3"
+    },
+    {
+      "text": "Geschafft!",
+      "file": "lenz-2f6ad66debc4.mp3"
+    },
+    {
+      "text": "Gib nur die richtigen Zutaten für Milchschokolade in den Mischer.",
+      "file": "lenz-1e4142a73b99.mp3"
+    },
+    {
+      "text": "Hallo!",
+      "file": "lenz-357a57fe73d6.mp3"
+    },
+    {
+      "text": "Heute hilfst du mir.",
+      "file": "lenz-37d4533fc980.mp3"
+    },
+    {
+      "text": "Hohle Schoko-Weihnachtsmänner entstehen übrigens so: Die Form wird beim Kühlen gedreht, dann bleibt die Schokolade nur innen an der Wand hängen.",
+      "file": "lenz-6c0f1703a657.mp3"
+    },
+    {
+      "text": "Ich bin Meister Lenz und leite die Produktionshalle hier in der Schokoladenfabrik.",
+      "file": "lenz-2c4ec89a6744.mp3"
+    },
+    {
+      "text": "Im Kühltunnel wird sie fest und kann aus der Form geklopft werden.",
+      "file": "lenz-61e99fa765e3.mp3"
+    },
+    {
+      "text": "In Milchschokolade steckt meistens mehr Zucker als Kakao!",
+      "file": "lenz-e30dd533989d.mp3"
+    },
+    {
+      "text": "In den Kakaokernen steckt viel Fett: die Kakaobutter.",
+      "file": "lenz-2e9576e8152c.mp3"
+    },
+    {
+      "text": "In der Fabrik sortieren Maschinen mit Sieben, Magneten und Luftgebläsen alles aus, was nicht in die Schokolade gehört.",
+      "file": "lenz-33157265923e.mp3"
+    },
+    {
+      "text": "In der heißen Trommel werden die Bohnen geröstet.",
+      "file": "lenz-016a8e0b60bc.mp3"
+    },
+    {
+      "text": "In einer Maschine, die „Conche“ heißt, wird sie stundenlang gerührt und gewalzt.",
+      "file": "lenz-6e9358f365e8.mp3"
+    },
+    {
+      "text": "Je mehr Kakao, desto dunkler und herber schmeckt die Schokolade.",
+      "file": "lenz-704dba9323df.mp3"
+    },
+    {
+      "text": "Jetzt ist es schon fast Schokolade.",
+      "file": "lenz-ce3f919657ba.mp3"
+    },
+    {
+      "text": "Jetzt kommt die flüssige Schokolade in Formen – als Tafel, als Weihnachtsmann oder als Schokobonbon.",
+      "file": "lenz-22ae57a38573.mp3"
+    },
+    {
+      "text": "Jetzt werden die gerösteten Bohnen geknackt.",
+      "file": "lenz-fa581b71420e.mp3"
+    },
+    {
+      "text": "Kakaomasse allein schmeckt sehr bitter.",
+      "file": "lenz-f7956abd1422.mp3"
+    },
+    {
+      "text": "Kakaomasse, Zucker, Milchpulver und Kakaobutter werden gemischt.",
+      "file": "lenz-ebd49bd57737.mp3"
+    },
+    {
+      "text": "Ketchup und Senf",
+      "file": "lenz-9f912f67ceba.mp3"
+    },
+    {
+      "text": "Knacke alle Bohnen, puste die Schalen weg und dreh die Mühle.",
+      "file": "lenz-4bf888000171.mp3"
+    },
+    {
+      "text": "Manche Schokolade wird mehrere Tage lang gerührt!",
+      "file": "lenz-d4c6d70f2684.mp3"
+    },
+    {
+      "text": "Mit Kittel und Haube darfst du an die Maschinen.",
+      "file": "lenz-a4d6712fee40.mp3"
+    },
+    {
+      "text": "Nimm den Kakaosack mit zu Station 1.",
+      "file": "lenz-fe5f4e363872.mp3"
+    },
+    {
+      "text": "Riechst du das?",
+      "file": "lenz-c2dfbafac0c8.mp3"
+    },
+    {
+      "text": "Sauber!",
+      "file": "lenz-c4f9ff7584cc.mp3"
+    },
+    {
+      "text": "Schieb die Walze hin und her, bis die Schokolade ganz glatt ist.",
+      "file": "lenz-b7eb17d3c5fe.mp3"
+    },
+    {
+      "text": "Schön glatt!",
+      "file": "lenz-8e2f72d1706c.mp3"
+    },
+    {
+      "text": "Sehr gut!",
+      "file": "lenz-ad8bad8fb7cd.mp3"
+    },
+    {
+      "text": "Sie besteht aus Kakaobutter und braunen Kakaoteilchen.",
+      "file": "lenz-3be647cda36b.mp3"
+    },
+    {
+      "text": "Sie kühlt die Schokolade",
+      "file": "lenz-a3b43bf599aa.mp3"
+    },
+    {
+      "text": "Sie pflückt Kakaofrüchte",
+      "file": "lenz-c377bb206f3d.mp3"
+    },
+    {
+      "text": "Sie rührt die Schokolade ganz glatt",
+      "file": "lenz-afc1d54cdef3.mp3"
+    },
+    {
+      "text": "Sie werden gereinigt und sortiert",
+      "file": "lenz-597c1893efc5.mp3"
+    },
+    {
+      "text": "Sie werden in Formen gegossen",
+      "file": "lenz-c629146c7fe2.mp3"
+    },
+    {
+      "text": "Sie werden verpackt",
+      "file": "lenz-4ddecc9a15be.mp3"
+    },
+    {
+      "text": "So duftet es, wenn Kakao geröstet wird.",
+      "file": "lenz-f2858195b210.mp3"
+    },
+    {
+      "text": "So wird sie ganz glatt und zartschmelzend.",
+      "file": "lenz-872ebd18ca5e.mp3"
+    },
+    {
+      "text": "Starte die Trommel und drücke „Stopp“, wenn die Bohnen goldbraun sind.",
+      "file": "lenz-59e3023cca81.mp3"
+    },
+    {
+      "text": "Steine und Blätter fallen heraus.",
+      "file": "lenz-89b7206c4034.mp3"
+    },
+    {
+      "text": "Tippe alles an, was nicht in die Schokolade gehört.",
+      "file": "lenz-357f7cc535cc.mp3"
+    },
+    {
+      "text": "Trag den Karton zur Laderampe.",
+      "file": "lenz-5dc944eee5bf.mp3"
+    },
+    {
+      "text": "Trag die Kanne zu Station 4.",
+      "file": "lenz-7f89c7466c27.mp3"
+    },
+    {
+      "text": "Warum werden die Bohnen geröstet?",
+      "file": "lenz-ed7955eba8ee.mp3"
+    },
+    {
+      "text": "Warum wird Schokolade in Folie verpackt?",
+      "file": "lenz-d64115e93e4e.mp3"
+    },
+    {
+      "text": "Warum wird die gemahlene Kakaomasse dickflüssig?",
+      "file": "lenz-91cd4c5081f6.mp3"
+    },
+    {
+      "text": "Was kommt für Milchschokolade dazu?",
+      "file": "lenz-9a01c9ceaf50.mp3"
+    },
+    {
+      "text": "Was passiert in der Fabrik als Erstes mit den Kakaobohnen?",
+      "file": "lenz-236fb142646e.mp3"
+    },
+    {
+      "text": "Weil Wasser dazukommt",
+      "file": "lenz-4fcbc4d3df1e.mp3"
+    },
+    {
+      "text": "Weil die Kakaobutter schmilzt",
+      "file": "lenz-1ab0d89350b6.mp3"
+    },
+    {
+      "text": "Weil sie geschüttelt wird",
+      "file": "lenz-a062ee348694.mp3"
+    },
+    {
+      "text": "Weiter geht es zu Station 3.",
+      "file": "lenz-1026f5a4bca0.mp3"
+    },
+    {
+      "text": "Willkommen in der Fabrik!",
+      "file": "lenz-e5cadd02b822.mp3"
+    },
+    {
+      "text": "Wozu ist die Conche da?",
+      "file": "lenz-cfbf30c9acb9.mp3"
+    },
+    {
+      "text": "Wusstest du schon?",
+      "file": "lenz-b08ac7eb40d4.mp3"
+    },
+    {
+      "text": "Zieh dir vorne am Eingang Kittel und Haube an, dann geht es los!",
+      "file": "lenz-f94630d3300b.mp3"
+    },
+    {
+      "text": "Zucker, Milchpulver und zusätzliche Kakaobutter",
+      "file": "lenz-cba1b695d6a6.mp3"
+    },
+    {
+      "text": "Zucker, Salz und Mehl",
+      "file": "lenz-58d137845d73.mp3"
+    },
+    {
+      "text": "Zuerst müssen die Bohnen sauber sein: Beim Trocknen auf der Plantage sind manchmal Steinchen, Stöckchen oder Blätter dazwischen geraten.",
+      "file": "lenz-4f5f3bef33af.mp3"
+    },
+    {
+      "text": "Zum Schluss wird alles in Papier und bunte Folie gewickelt und in Kartons verpackt.",
+      "file": "lenz-da1de01b1ea1.mp3"
+    },
+    {
+      "text": "Zum Schutz vor Licht, Luft und Gerüchen",
+      "file": "lenz-348769674d9d.mp3"
+    }
+  ],
+  "context_spans": {
+    "Geschafft!": {
+      "first_word": 3,
+      "word_count": 1
+    }
+  }
+}

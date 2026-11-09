@@ -1,0 +1,86 @@
+{
+  "lenz-2f6ad66debc4.mp3": {
+    "text": "Geschafft!",
+    "context": "Das habe ich geschafft.",
+    "kept_words": [
+      "geschafft"
+    ],
+    "start_seconds": 0.795457,
+    "cut_seconds": 1.92,
+    "removed_words": [
+      "Das",
+      "habe",
+      "ich"
+    ],
+    "previous_word_end_seconds": 0.795457,
+    "word_start_seconds": 0.795458,
+    "next_word": null,
+    "next_word_seconds": null
+  },
+  "lenz-357a57fe73d6.mp3": {
+    "text": "Hallo!",
+    "context": "Hallo! Ich bin Meister Lenz und leite die Produktionshalle hier in der Schokoladenfabrik. Heute hilfst du mir. Zieh dir vorne am Eingang Kittel und Haube an, dann geht es los!",
+    "kept_words": [
+      "Hallo"
+    ],
+    "cut_seconds": 0.9118329999999999,
+    "next_word": "Ich",
+    "next_word_seconds": 1.117041
+  },
+  "lenz-c2dfbafac0c8.mp3": {
+    "text": "Riechst du das?",
+    "context": "Riechst du das? So duftet es, wenn Kakao geröstet wird. Weiter geht es zu Station 3.",
+    "kept_words": [
+      "Riechst",
+      "du",
+      "das"
+    ],
+    "cut_seconds": 1.32375,
+    "next_word": "So",
+    "next_word_seconds": 1.590916
+  },
+  "lenz-c4f9ff7584cc.mp3": {
+    "text": "Sauber!",
+    "context": "Sauber! Bring die Kiste jetzt zu Station 2 zum Rösten.",
+    "kept_words": [
+      "Sauber"
+    ],
+    "cut_seconds": 0.956124,
+    "next_word": "Bring",
+    "next_word_seconds": 1.157958
+  },
+  "lenz-8e2f72d1706c.mp3": {
+    "text": "Schön glatt!",
+    "context": "Schön glatt! Bring die Kanne zu Station 6. Dort kommt die Schokolade in Formen.",
+    "kept_words": [
+      "Schön",
+      "glatt"
+    ],
+    "cut_seconds": 1.197624,
+    "next_word": "Bring",
+    "next_word_seconds": 1.401125
+  },
+  "lenz-ad8bad8fb7cd.mp3": {
+    "text": "Sehr gut!",
+    "context": "Sehr gut! Mit Kittel und Haube darfst du an die Maschinen. Nimm den Kakaosack mit zu Station 1.",
+    "kept_words": [
+      "Sehr",
+      "gut"
+    ],
+    "cut_seconds": 1.153291,
+    "next_word": "Mit",
+    "next_word_seconds": 1.358541
+  },
+  "lenz-b08ac7eb40d4.mp3": {
+    "text": "Wusstest du schon?",
+    "context": "Wusstest du schon? In der Fabrik sortieren Maschinen mit Sieben, Magneten und Luftgebläsen alles aus, was nicht in die Schokolade gehört.",
+    "kept_words": [
+      "Wusstest",
+      "du",
+      "schon"
+    ],
+    "cut_seconds": 1.48,
+    "next_word": "In",
+    "next_word_seconds": 1.685208
+  }
+}
