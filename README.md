@@ -105,3 +105,12 @@ Rösten.“ gewonnen. „Das ist“ wird anhand der Wortzeitmarken entfernt; der
 endet direkt nach „sauber“, vor dem anschließenden „Bring“. Vollständiger
 Quellsatz: `assets/audio/lenz-c4f9ff7584cc-quellsatz.mp3`.
 Im Spiel verwendeter Ausschnitt: `assets/audio/lenz-c4f9ff7584cc.mp3`.
+
+## Einstieg an einzelnen Stationen
+
+Mit `#station1` bis `#station6` am Ende der Adresse startet das Spiel direkt an
+dieser Station, z. B.
+`https://noraumlauft.github.io/exkursion-schokoladenfabrik/#station3`.
+Kittel, Haube und das Zwischenprodukt der vorherigen Station sind dann schon
+vorhanden. QR-Codes liegen in `qr-codes/`, zum Drucken in
+`qr-codes/alle-stationen.pdf`.

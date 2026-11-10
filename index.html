@@ -1063,11 +1063,11 @@ function cert(score){
 }
 function openStart(){
  showModal(`<div style="text-align:center"><div style="font-size:52px">🏭🍫</div><h2 style="font-size:26px;margin:4px 0">Schokoladenfabrik</h2>
-  <p class="intro">Die Kakaosäcke vom Hafen sind angekommen! Bring sie durch die Fabrik und hilf an den sechs Maschinen mit, bis aus den Bohnen Schokolade geworden ist. <b>Wichtig:</b> In der Fabrik braucht man Kittel und Haube – die hängen gleich am Eingang.</p>
+  <p class="intro">${window.__stationEntry!=null?`Willkommen zurück! Es geht weiter bei <b>Station ${window.__stationEntry+1}: ${STATIONS[window.__stationEntry].name}</b>. Kittel, Haube und alles, was du dafür brauchst, hast du schon dabei.`:'Die Kakaosäcke vom Hafen sind angekommen! Bring sie durch die Fabrik und hilf an den sechs Maschinen mit, bis aus den Bohnen Schokolade geworden ist. <b>Wichtig:</b> In der Fabrik braucht man Kittel und Haube – die hängen gleich am Eingang.'}</p>
   <p><input class="name" id="nm" placeholder="Dein Name" maxlength="24"></p>
   <p style="font-size:15px;opacity:.8">Laufen: Pfeiltasten ◀ ▶ oder auf den Boden tippen</p>
   <button class="btn big" id="go">Los geht's! 🚶</button></div>`);
- $('#go').onclick=()=>{setTimeout(enterFS,0);playerName=$('#nm').value.trim().replace(/[<>&"]/g,'');hideModal();nearCur='x';say(`Hallo! Ich bin Meister Lenz und leite die Produktionshalle hier in der Schokoladenfabrik. Heute hilfst du mir. Zieh dir vorne am Eingang Kittel und Haube an, dann geht es los!`)};
+ $('#go').onclick=()=>{setTimeout(enterFS,0);playerName=$('#nm').value.trim().replace(/[<>&"]/g,'');hideModal();nearCur='x';if(window.__stationEntry!=null)say('Willkommen in der Fabrik!');else say(`Hallo! Ich bin Meister Lenz und leite die Produktionshalle hier in der Schokoladenfabrik. Heute hilfst du mir. Zieh dir vorne am Eingang Kittel und Haube an, dann geht es los!`)};
 }
 
 /* ---------- Vollbild ---------- */
@@ -1123,7 +1123,12 @@ $('#game').addEventListener('pointerdown',e=>{if(!modalOpen&&!scene)target=cam+e
 addEventListener('keydown',e=>{if(e.key==='Escape'){if(!modalOpen&&!scene)openMenu();return}if(e.target.tagName==='INPUT')return;if(['ArrowLeft','a','A'].includes(e.key)){keys.left=true;target=null}if(['ArrowRight','d','D'].includes(e.key)){keys.right=true;target=null}if((e.key===' '||e.key==='Enter')&&!modalOpen){e.preventDefault();act()}});
 addEventListener('keyup',e=>{if(['ArrowLeft','a','A'].includes(e.key))keys.left=false;if(['ArrowRight','d','D'].includes(e.key))keys.right=false});
 addEventListener('resize',layout);
-$('#gfig').innerHTML=MEISTER;build();renderGround();updateCarry();layout();openStart();$('#carry').addEventListener('animationend',e=>{if(e.animationName==='carrypop')e.currentTarget.classList.remove('pop')});requestAnimationFrame(loop);
+/* Direkteinstieg an einer Station per Link, z. B. …/#station3. Die Raute wird danach entfernt, damit Neuladen nicht zurückspringt. */
+window.__stationEntry=(function(){var m=/^#station[-_]?([1-6])$/i.exec(location.hash);if(!m)return null;try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}return m[1]-1})();
+addEventListener('hashchange',function(){if(/^#station[-_]?[1-6]$/i.test(location.hash))location.reload()});
+// Gleicher Zustand wie nach dem Überspringen der vorherigen Stationen
+function applyStationEntry(){const i=window.__stationEntry;if(i===null)return;done=i;load=i;dressed=true;saidDressed=true;px=zone('#st'+i,STATIONS[i].x)[0]+40;loadOrigin=px;updateMarkers()}
+$('#gfig').innerHTML=MEISTER;build();applyStationEntry();renderGround();updateCarry();layout();openStart();$('#carry').addEventListener('animationend',e=>{if(e.animationName==='carrypop')e.currentTarget.classList.remove('pop')});requestAnimationFrame(loop);
 </script>
 
 
