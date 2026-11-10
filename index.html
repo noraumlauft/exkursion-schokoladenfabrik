@@ -1075,24 +1075,18 @@ const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
 const fsOK=!!(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen);
 const isIOS=/iPhone|iPod/.test(navigator.userAgent)||(/iPad|Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
 const standalone=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
-function enterFS(){const d=document.documentElement;if(fsEl()||standalone)return;
- if(!fsOK){if(isIOS)iosHint();return}
+function enterFS(){const d=document.documentElement;if(isIOS||!fsOK||fsEl()||standalone)return; // iOS: Safari warnt im Vollbild bei Texteingaben
  try{const r=d.requestFullscreen?d.requestFullscreen({navigationUI:'hide'}):d.webkitRequestFullscreen();
   const lock=()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{})}catch(e){}};
-  if(r&&r.then)r.then(lock).catch(()=>{if(isIOS)iosHint()});else lock()}catch(e){if(isIOS)iosHint()}}
-function iosHint(){let seen=false;try{seen=sessionStorage.getItem('fsHint')}catch(e){}if(seen&&!iosHint.force)return;iosHint.force=false;try{sessionStorage.setItem('fsHint',1)}catch(e){}
- showModal(`<div style="text-align:center"><div style="font-size:44px">📱</div><h2 style="margin:4px 0 8px">Vollbild auf dem iPhone</h2><p class="intro">Safari erlaubt auf dem iPhone kein Vollbild für Webseiten. So klappt es trotzdem:</p>
-  <div class="steps"><div class="step"><big>⬆️</big>Unten auf <b>Teilen</b> tippen</div><div class="step"><big>➕</big><b>Zum Home-Bildschirm</b> wählen</div><div class="step"><big>🍫</big>Spiel über das neue Symbol starten</div></div>
-  <p style="font-size:15px;opacity:.8">Tipp: Drehe das Handy quer, dann siehst du mehr von der Fabrik.</p><button class="btn big" id="okfs">Verstanden – weiterspielen</button></div>`);
- $('#okfs').onclick=()=>{hideModal();nearCur='x'}}
+  if(r&&r.then)r.then(lock).catch(()=>{});else lock()}catch(e){}}
 function exitFS(){try{(document.exitFullscreen||document.webkitExitFullscreen).call(document)}catch(e){}}
 function fsIcon(){$('#fsbtn').textContent=fsEl()?'✕':'⛶';$('#fsbtn').title=fsEl()?'Vollbild beenden':'Vollbild';setTimeout(layout,200)}
-if(standalone||(!fsOK&&!isIOS))$('#fsbtn').style.display='none';
+if(standalone||isIOS||!fsOK)$('#fsbtn').style.display='none';
 $('#menubtn').onclick=()=>{if(!modalOpen&&!scene)openMenu()};
 function sndIcon(){const off=Sfx.isMuted(),b=$('#sndbtn');b.textContent=off?'🔕':'🔔';b.title=off?'Ton einschalten':'Ton ausschalten';b.setAttribute('aria-label',b.title)}
 $('#sndbtn').onclick=()=>{Sfx.toggle();stopSpeech();sndIcon();if(sayNow){const l=sayNow;sayNow=null;playLine(l)}};sndIcon();
 $('#gskip').onclick=()=>{stopSpeech();lineDone()};$('#tstation').onclick=skipStation;
-$('#fsbtn').onclick=()=>{if(fsEl())exitFS();else if(!fsOK){iosHint.force=true;iosHint()}else enterFS()};
+$('#fsbtn').onclick=()=>{if(fsEl())exitFS();else enterFS()};
 document.addEventListener('fullscreenchange',fsIcon);document.addEventListener('webkitfullscreenchange',fsIcon);
 
 /* ---------- Spielmenü: Name ändern, neu starten ---------- */
@@ -1123,6 +1117,14 @@ $('#game').addEventListener('pointerdown',e=>{if(!modalOpen&&!scene)target=cam+e
 addEventListener('keydown',e=>{if(e.key==='Escape'){if(!modalOpen&&!scene)openMenu();return}if(e.target.tagName==='INPUT')return;if(['ArrowLeft','a','A'].includes(e.key)){keys.left=true;target=null}if(['ArrowRight','d','D'].includes(e.key)){keys.right=true;target=null}if((e.key===' '||e.key==='Enter')&&!modalOpen){e.preventDefault();act()}});
 addEventListener('keyup',e=>{if(['ArrowLeft','a','A'].includes(e.key))keys.left=false;if(['ArrowRight','d','D'].includes(e.key))keys.right=false});
 addEventListener('resize',layout);
+/* Verhindert das Neuladen durch Runterziehen auf iPad/iPhone. Scrollbare Fenster bleiben bedienbar. */
+(function(){var y0=0;
+ document.addEventListener('touchstart',function(e){if(e.touches.length===1)y0=e.touches[0].clientY},{passive:true,capture:true});
+ document.addEventListener('touchmove',function(e){if(e.touches.length!==1||!e.cancelable)return;var dy=e.touches[0].clientY-y0;
+  for(var n=e.target;n&&n.nodeType===1;n=n.parentElement){var o=getComputedStyle(n).overflowY;
+   if((o==='auto'||o==='scroll')&&n.scrollHeight>n.clientHeight+1){if(!((dy>0&&n.scrollTop<=0)||(dy<0&&n.scrollTop+n.clientHeight>=n.scrollHeight-1)))return;break}}
+  e.preventDefault()},{passive:false,capture:true});
+})();
 /* Direkteinstieg an einer Station per Link, z. B. …/#station3. Die Raute wird danach entfernt, damit Neuladen nicht zurückspringt. */
 window.__stationEntry=(function(){var m=/^#station[-_]?([1-6])$/i.exec(location.hash);if(!m)return null;try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}return m[1]-1})();
 addEventListener('hashchange',function(){if(/^#station[-_]?[1-6]$/i.test(location.hash))location.reload()});
